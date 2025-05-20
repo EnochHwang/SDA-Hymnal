@@ -25,12 +25,15 @@ body, html {
   background: #f9f9f9;
 }
 
+#scoreContainer {
+  overflow: hidden;
+  position: relative;
+}
+
 #score {
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin-top: 20px;
+  transition: transform 0.3s ease;
+  touch-action: pan-y;
+  will-change: transform;
 }
 
 #status {
