@@ -4,18 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SDA Hymnal</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>SDA Hymnal</h1>
-    <div id="cache-status">Offline Cache: <span id="cache-progress">0 / 600</span></div>
-  </header>
-  <main id="viewer">
-    <div id="score-container">
-      <img id="score" src="scores/0001.png" alt="Music Score Page" />
-    </div>
-  </main>
+  <div id="scoreContainer">
+    <img id="imgA" class="scoreImage" draggable="false" />
+    <img id="imgB" class="scoreImage" draggable="false" />
+  </div>
+  <div id="cacheStatus">Caching...</div>
   <script src="app.js"></script>
 </body>
 </html>
