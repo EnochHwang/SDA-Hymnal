@@ -1,4 +1,4 @@
-const totalPages = 600;
+const totalPages = 10;
 let currentPage = 1;
 const scoreImg = document.getElementById('score');
 const cacheProgress = document.getElementById('cache-progress');
