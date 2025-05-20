@@ -25,16 +25,22 @@ body, html {
   background: #f9f9f9;
 }
 
-#scoreContainer {
-  overflow: hidden;
+#score-container {
   position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
 }
 
 #score {
-  transition: transform 0.3s ease;
-  touch-action: pan-y;
-  will-change: transform;
+  max-width: 100%;
+  height: auto;
+  position: absolute;
+  transition: transform 0.4s ease, opacity 0.4s ease;
 }
+
 
 #status {
   position: fixed;
