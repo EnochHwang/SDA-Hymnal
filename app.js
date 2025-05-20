@@ -8,6 +8,7 @@ window.addEventListener('DOMContentLoaded', () => {
   showPage(currentPage);
 });
 
+
 function showPage(num, direction = 'left') {
   if (num < 1 || num > totalPages || num === currentPage) return;
 
