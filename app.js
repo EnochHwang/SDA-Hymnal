@@ -44,11 +44,58 @@ function prevPage() {
   showPage(currentPage - 1, 'right');
 }
 
-let touchStartX = 0;
-scoreImg.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
-scoreImg.addEventListener('touchend', e => {
-  const diffX = e.changedTouches[0].screenX - touchStartX;
-  if (Math.abs(diffX) > 50) (diffX < 0 ? nextPage() : prevPage());
+let startX  = 0;
+let currentX = 0;
+let isDragging = false;
+
+scoreImg.addEventListener('touchstart', e => {
+  startX = e.touches[0].clientX;
+  isDragging = true;
+  scoreImg.style.transition = 'none';
+});
+
+scoreImg.addEventListener('touchmove', (e) => {
+  if (!isDragging) return;
+  currentX = e.touches[0].clientX;
+  const deltaX = currentX - startX;
+  scoreImg.style.transform = `translateX(${deltaX}px)`;
+});
+
+scoreImg.addEventListener('touchend', (e) => {
+  if (!isDragging) return;
+  isDragging = false;
+
+  const deltaX = currentX - startX;
+  const threshold = 50; // Minimum distance to count as swipe
+
+  scoreImg.style.transition = 'transform 0.3s ease';
+
+  if (deltaX > threshold) {
+    // Swipe right → show previous page
+    scoreImg.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      prevPage();
+      scoreImg.style.transform = 'translateX(-100%)';
+      requestAnimationFrame(() => {
+        scoreImg.style.transition = 'transform 0.3s ease';
+        scoreImg.style.transform = 'translateX(0)';
+      });
+    }, 100);
+  } else if (deltaX < -threshold) {
+    // Swipe left → show next page
+    scoreImg.style.transform = 'translateX(-100%)';
+    setTimeout(() => {
+      nextPage();
+      scoreImg.style.transform = 'translateX(100%)';
+      requestAnimationFrame(() => {
+        scoreImg.style.transition = 'transform 0.3s ease';
+        scoreImg.style.transform = 'translateX(0)';
+      });
+    }, 100);
+  } else {
+    // Not enough movement — snap back
+    scoreImg.style.transform = 'translateX(0)';
+  }
 });
 
 document.addEventListener('keydown', e => {
