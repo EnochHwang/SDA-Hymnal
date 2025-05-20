@@ -1,90 +1,100 @@
+
 const totalPages = 10;
 let currentPage = 1;
-const scoreImg = document.getElementById('score');
-const cacheProgress = document.getElementById('cache-progress');
 
-// Load the first page when DOM is ready
-window.addEventListener('DOMContentLoaded', () => {
-  showPage(currentPage);
-});
+const imgA = document.getElementById('imgA');
+const imgB = document.getElementById('imgB');
+let showingA = true;
 
+let startX = 0;
+let currentX = 0;
+let isDragging = false;
+let cacheStatus = document.getElementById('cacheStatus');
 
-function showPage(num, direction = 'left') {
-  if (num < 1 || num > totalPages || num === currentPage) return;
-
-  const oldImg = scoreImg.cloneNode();
-  oldImg.src = `scores/${String(currentPage).padStart(4, '0')}.png`;
-  oldImg.style.zIndex = 1;
-  document.getElementById('score-container').appendChild(oldImg);
-
-  currentPage = num;
-  const padded = String(currentPage).padStart(4, '0');
-  scoreImg.style.opacity = 0;
-  scoreImg.style.transform = `translateX(${direction === 'left' ? '100%' : '-100%'})`;
-  scoreImg.src = `scores/${padded}.png`;
+function showPage(pageNum, direction = 0) {
+  const currentImg = showingA ? imgA : imgB;
+  const nextImg = showingA ? imgB : imgA;
+  nextImg.style.transition = 'none';
+  nextImg.style.transform = `translateX(${direction * 100}%)`;
+  nextImg.src = `scores/${pageNum.toString().padStart(4, '0')}.png`;
 
   requestAnimationFrame(() => {
-    scoreImg.style.transition = 'none';
-    scoreImg.style.transform = `translateX(${direction === 'left' ? '-100%' : '100%'})`;
-    scoreImg.offsetHeight;
-    scoreImg.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-    scoreImg.style.transform = 'translateX(0)';
-    scoreImg.style.opacity = 1;
-    oldImg.style.transform = `translateX(${direction === 'left' ? '-100%' : '100%'})`;
-    oldImg.style.opacity = 0;
-    setTimeout(() => oldImg.remove(), 400);
+    nextImg.style.transition = 'transform 0.3s ease';
+    currentImg.style.transform = `translateX(${-direction * 100}%)`;
+    nextImg.style.transform = 'translateX(0)';
   });
-}
 
-function nextPage() {
-  showPage(currentPage + 1, 'left');
+  showingA = !showingA;
 }
 
 function prevPage() {
-  showPage(currentPage - 1, 'right');
+  if (currentPage <= 1) return;
+  currentPage--;
+  showPage(currentPage, -1);
 }
 
-let touchStartX = 0;
-scoreImg.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
-scoreImg.addEventListener('touchend', e => {
-  const diffX = e.changedTouches[0].screenX - touchStartX;
-  if (Math.abs(diffX) > 50) (diffX < 0 ? nextPage() : prevPage());
+function nextPage() {
+  if (currentPage >= totalPages) return;
+  currentPage++;
+  showPage(currentPage, 1);
+}
+
+const container = document.getElementById('scoreContainer');
+
+container.addEventListener('touchstart', (e) => {
+  startX = e.touches[0].clientX;
+  isDragging = true;
 });
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight') nextPage();
-  if (e.key === 'ArrowLeft') prevPage();
+container.addEventListener('touchmove', (e) => {
+  if (!isDragging) return;
+  currentX = e.touches[0].clientX;
+  const deltaX = currentX - startX;
+
+  const activeImg = showingA ? imgA : imgB;
+  activeImg.style.transition = 'none';
+  activeImg.style.transform = `translateX(${deltaX}px)`;
 });
 
-async function backgroundCacheScores() {
-  const cache = await caches.open('piano-book-v2');
-  let cachedCount = 0;
-  for (let i = 1; i <= totalPages; i++) {
-    const padded = String(i).padStart(4, '0');
-    const url = `scores/${padded}.png`;
-    try {
-      const match = await cache.match(url);
-      if (!match) {
-        const response = await fetch(url);
-        await cache.put(url, response.clone());
-        console.log(`Cached: ${url}`);
-      } else {
-        console.log(`Already cached: ${url}`);
+container.addEventListener('touchend', () => {
+  if (!isDragging) return;
+  isDragging = false;
+
+  const deltaX = currentX - startX;
+  const threshold = 50;
+
+  if (deltaX > threshold) {
+    prevPage();
+  } else if (deltaX < -threshold) {
+    nextPage();
+  } else {
+    const activeImg = showingA ? imgA : imgB;
+    activeImg.style.transition = 'transform 0.3s ease';
+    activeImg.style.transform = 'translateX(0)';
+  }
+});
+
+// Initial load
+showPage(currentPage);
+
+// Background caching
+if ('caches' in window && location.protocol === 'https:') {
+  caches.open('SDA-Hymnal-v1').then(cache => {
+    let cachedCount = 0;
+    const cacheNext = (i) => {
+      if (i > totalPages) {
+        cacheStatus.textContent = "All pages cached";
+        return;
       }
-      cachedCount++;
-    } catch (err) {
-      console.warn(`Error caching ${url}:`, err);
-    }
-    cacheProgress.textContent = `${cachedCount} / ${totalPages}`;
-  }
+      const url = `scores/${i.toString().padStart(4, '0')}.png`;
+      cache.add(url).then(() => {
+        cachedCount++;
+        cacheStatus.textContent = `Cached ${cachedCount}/${totalPages}`;
+        cacheNext(i + 1);
+      });
+    };
+    cacheNext(1);
+  });
+} else {
+  cacheStatus.textContent = "Caching disabled (non-HTTPS)";
 }
-
-
-window.addEventListener('load', () => {
-  setTimeout(backgroundCacheScores, 3000);
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(() => {
-      console.log('SW registered');
-    }).catch(console.error);
-  }
-});
