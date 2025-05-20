@@ -3,6 +3,8 @@ let currentPage = 1;
 const scoreImg = document.getElementById('score');
 const statusDiv = document.getElementById('status');
 
+showPage(currentPage);
+
 function showPage(num) {
   const padded = String(num).padStart(4, '0');
   const url = `scores/${padded}.png`;
