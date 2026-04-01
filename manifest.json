@@ -4,7 +4,7 @@
   "description": "The complete SDA Hymnal plus many more songs from the old hymnal and choruses",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#AC4141",
+  "background_color": "#C8353B",
   "icons": [
     {
       "src": "icons/icon-192.png",
