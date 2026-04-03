@@ -576,6 +576,13 @@ body {
   pointer-events: none; /* No interaction until visible */
   transition: opacity 0.3s ease;
 }
+/* For Tablets and larger (screens taller than 800px) */
+@media (min-height: 800px) {
+.editMySongsOverlay {
+    align-items: flex-start;
+    padding-top: 10vh; /* Move it up only when there is plenty of room */
+  }
+}
 .musicPlayerOverlay.show, .importMySongsOverlay.show, .editMySongsOverlay.show {
   opacity: 1;
   pointer-events: auto;

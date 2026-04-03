@@ -1943,15 +1943,16 @@ function openMusicPlayer() {
 
     // If the file can't be loaded, show error
     audio.onerror = () => {
+      audioFilenameDiv.textContent = "No audio file";
       // If it fails and we haven't tried a 'retry' yet
-      if (!audio.src.includes('?retry=')) {
-        console.log("Audio load failed, trying offline-friendly fetch...");
-        const originalSrc = audio.src;
-        audio.src = originalSrc + "?retry=" + Date.now();
-        audio.load();
-      } else {
-        audioFilenameDiv.textContent = "No audio file";
-      }      
+      // if (!audio.src.includes('?retry=')) {
+        // console.log("Audio load failed, trying offline-friendly fetch...");
+        // const originalSrc = audio.src;
+        // audio.src = originalSrc + "?retry=" + Date.now();
+        // audio.load();
+      // } else {
+        // audioFilenameDiv.textContent = "No audio file";
+      // }      
     };
 
   }
@@ -2408,7 +2409,8 @@ function updatePageNumberFromInput(name) {
 
 // This is called when the DONE button in Edit My Songs popup is pressed
 function doneEditMySongs() {
-  const filename = document.getElementById('inputFileName').value.trim();
+  // get the input filename and strip out all the spaces (if any) before the page number at the end
+  const filename = document.getElementById('inputFileName').value.trim().replace(/\s+(?=\d+$)/, '');
   const imageElement = document.getElementById('imagePreview');
 
   if (!filename || !imageElement.src) return;
