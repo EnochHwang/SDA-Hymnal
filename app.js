@@ -52,8 +52,8 @@ document.addEventListener('visibilitychange', async () => {
 
 // when back online re-fetch all the broken img links
 window.addEventListener('online', () => {
-  console.log("%c" + "Online", "color: green;");
-  showToast("Online");
+  //console.log("%c" + "Online", "color: green;");
+  //showToast("Online");
   
   // Find all images in the swiper
   document.querySelectorAll('.swiper-zoom-container img').forEach(img => {
@@ -67,8 +67,8 @@ window.addEventListener('online', () => {
 });
 
 window.addEventListener('offline', () => {
-  console.log("%c" + "Offline", "color: red;");
-  showToast("Offline");
+  //console.log("%c" + "Offline", "color: red;");
+  //showToast("Offline");
 });
 
 
@@ -153,7 +153,7 @@ let swiper = new Swiper(".swiper", {
           img.src = mySongs[title];
           
         } else {  // it's a regular song in songsheet. Fetch it from cache or network
-          console.log("swiper loading ",title);
+          //console.log("swiper loading ",title);
           img.src = `songsheets/${title}.png`;
         }
 
@@ -2721,6 +2721,6 @@ setInterval(() => {
       reg.update();  // step 1
     }
   });
-}, 24 * 60 * 60 * 1000); // 6 * 60 * 60 * 1000 every 24 hours
-//}, 6 * 60 * 60 * 1000); // 6 * 60 * 60 * 1000 every 6 hours
-//}, 15 * 1000);
+//}, 24 * 60 * 60 * 1000); // every 24 hours
+//}, 1 * 60 * 60 * 1000);  // every 1 hour
+}, 15 * 1000);           // every 15 seconds

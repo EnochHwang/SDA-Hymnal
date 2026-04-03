@@ -1,4 +1,4 @@
-var CACHE_NAME = 'SDA-Hymnal-cache-v1';
+var CACHE_NAME = 'SDA-Hymnal-cache-v2';
 
 // include all the files for offline access
 // do not include sw.js
@@ -980,66 +980,66 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
-
-      // extract the filename for debugging only
       const url = new URL(event.request.url);
-      const fileName = decodeURI(url.pathname.split('/').pop()) || 'index.html';
+      //const fileName = decodeURI(url.pathname.split('/').pop()) || 'index.html';  // this is only needed for debugging
 
       try {
-        // 1. Try to load from cache first
-        const cachedResponse = await cache.match(event.request);
-        if (cachedResponse) {
-          console.log("Fetched from cache ",fileName);
-          return cachedResponse;
+        //console.log(`%cSW Fetching: ${fileName}`, "color: gray;");
+
+        // 1. Try a Strict Match first
+        let cachedResponse = await cache.match(event.request);
+
+        // 2. If no strict match, try matching by URL String ignoring search params
+        // This is crucial for audio and the ?refetch= logic
+        if (!cachedResponse) {
+          cachedResponse = await cache.match(event.request.url, { 
+            ignoreSearch: true,
+            ignoreVary: true 
+          });
+          if (cachedResponse) {
+             //console.log(`%c[Cache Hit] ${fileName} (via URL String match)`, "color: green; font-weight: bold;");
+          }
+        } else {
+          //console.log(`%c[Cache Hit] ${fileName} (via Request match)`, "color: green; font-weight: bold;");
         }
 
-        // 2. Not in cache so do a Network Fetch
+        if (cachedResponse) return cachedResponse;
+
+        // 3. Not in cache so do a Network Fetch
+        //console.log(`%c[Network Request] ${fileName}`, "color: orange;");
         const fetchResponse = await fetch(event.request);
 
-        // 3. Handle Partial Content (The 206 "Audio Stream" trigger)
+        // 4. Handle Partial Content (Audio Stream)
         if (fetchResponse.status === 206) {
-          // We create a clean URL object to ensure the background fetch 
-          // hits the exact same location as the original request.
-          const fullUrl = event.request.url;
-
-          // Perform the background download for the WHOLE file
-          // We don't 'await' this so the audio plays immediately
-          fetch(fullUrl)
+          const cleanUrl = event.request.url.split('?')[0]; // Strip timestamps for saving
+          fetch(cleanUrl)
             .then((fullResponse) => {
               if (fullResponse.status === 200) {
-                // IMPORTANT: Use the URL string as the key to avoid 
-                // any header-matching issues with Range requests
-                cache.put(fullUrl, fullResponse);
-                console.log("Audio cached successfully:", fullUrl);
+                cache.put(cleanUrl, fullResponse); // Save under clean URL
+                //console.log(`%c[Audio Saved] ${fileName}`, "color: blue;");
               }
-            })
-            .catch((err) => console.error("Background fetch failed:", err));
-
-          console.log("Fetched audio from network ",fileName);
+            });
           return fetchResponse;
         }
 
-        // 4. Regular files (Status 200)
-        if (fetchResponse.status === 200) { // save newly fetched file to cache
-          await cache.put(event.request, fetchResponse.clone());
-          console.log("Saved to cache ",fileName);
+        // 5. Regular files (Status 200)
+        if (fetchResponse.ok) {
+          const cleanUrl = event.request.url.split('?')[0];
+          await cache.put(cleanUrl, fetchResponse.clone());
+          //console.log(`%c[Saved to Cache] ${fileName}`, "color: #28a745;");
         }
         
-        console.log("Fetched from network ",fileName);
         return fetchResponse;
 
       } catch (error) {
-        // If the network is down and not in cache, fallback
-        // Check if the request is for a web page (navigation)
-        if (event.request.mode === 'navigate') {
-          const fallback = await cache.match("index.html"); // return index.html for actual page navigation
+        // If offline and not in cache, fallback
+        //console.log(`%c[Offline Error] ${fileName}`, "color: red;");
+        if (event.request.mode === 'navigate') {  // Check if the request is for a web page (navigation)
+          const fallback = await cache.match("index.html");
           return fallback || new Response("Offline", { status: 503 });
         }
-        
-        // If it's an image or audio that failed offline, just return a 404.
-        // This tells the browser "This failed, need to try again next time"
+        // It's an image or audio that failed offline, just return a 404.
         return new Response(null, { status: 404, statusText: "Offline" });
-    
       }
     })()
   );
