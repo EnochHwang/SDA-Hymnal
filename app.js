@@ -50,10 +50,33 @@ document.addEventListener('visibilitychange', async () => {
   }
 });
 
+// when back online re-fetch all the broken img links
+window.addEventListener('online', () => {
+  console.log("%c" + "Online", "color: green;");
+  showToast("Online");
+  
+  // Find all images in the swiper
+  document.querySelectorAll('.swiper-zoom-container img').forEach(img => {
+    // If the image is broken (naturalWidth is 0)
+    if (img.naturalWidth === 0) {
+      const title = img.dataset.title;
+      // The '?refetch=' + Date.now() part clears the browser's memory and do a refetch
+      img.src = `songsheets/${title}.png?refetch=` + Date.now();
+    }
+  });
+});
+
+window.addEventListener('offline', () => {
+  console.log("%c" + "Offline", "color: red;");
+  showToast("Offline");
+});
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 // Initialize Swiper
+/*
+// oringinal
 let swiper = new Swiper(".swiper", {
     zoom: {
         maxRatio: 5,
@@ -64,13 +87,13 @@ let swiper = new Swiper(".swiper", {
     speed: 500,
     virtual: {
       renderSlide: function (title, index) {
-        /*  <div> format
-        <div class="swiper-slide">
-          <div class="swiper-zoom-container">
-            <img src="songsheets/1 Praise to the Lord.png">
-          </div>
-        </div>
-        */
+        //<div> format
+        //<div class="swiper-slide">
+        //  <div class="swiper-zoom-container">
+        //    <img src="songsheets/1 Praise to the Lord.png">
+        //  </div>
+        //</div>
+        
         const swiper_slide = document.createElement('div');
         swiper_slide.className = 'swiper-slide';
         const swiper_zoom = document.createElement('div');
@@ -82,8 +105,11 @@ let swiper = new Swiper(".swiper", {
         if (mySongs[title]) {
           // It's a My Song! Use the Base64 data from local storage
           img.src = mySongs[title];
-        } else {  // it's a regular song in songsheet
+          
+        } else {  // it's a regular song in songsheet. Fetch it from cache or network
+          console.log("swiper loading ",title);
           img.src = `songsheets/${title}.png`;
+        
         }
 
         img.alt = title;
@@ -94,6 +120,77 @@ let swiper = new Swiper(".swiper", {
     }
   }
 });
+*/
+
+
+let swiper = new Swiper(".swiper", {
+    zoom: {
+        maxRatio: 5,
+        minRatio: 1,
+        toggle: false // DISABLE Double-Tap Zoom (Crucial for Long Press)
+    },
+    grabCursor: true,
+    speed: 500,
+    virtual: {
+      renderSlide: function (title, index) {
+        //<div> format
+        //<div class="swiper-slide">
+        //  <div class="swiper-zoom-container">
+        //    <img src="songsheets/1 Praise to the Lord.png">
+        //  </div>
+        //</div>
+        
+        const swiper_slide = document.createElement('div');
+        swiper_slide.className = 'swiper-slide';
+        const swiper_zoom = document.createElement('div');
+        swiper_zoom.className = 'swiper-zoom-container';
+        const img = document.createElement('img');
+        
+        // check for MySongs in local storage first
+        const mySongs = JSON.parse(localStorage.getItem(APP_NAME+"_MySongs") || '{}');
+        if (mySongs[title]) {
+          // It's a My Song! Use the Base64 data from local storage
+          img.src = mySongs[title];
+          
+        } else {  // it's a regular song in songsheet. Fetch it from cache or network
+          console.log("swiper loading ",title);
+          img.src = `songsheets/${title}.png`;
+        }
+
+        img.alt = title;
+        img.dataset.title = title;  // IMPORTANT: Store the title here so the Wrapper can find it later
+        swiper_zoom.appendChild(img);
+        swiper_slide.appendChild(swiper_zoom);
+        return swiper_slide;
+      }
+    },
+  
+    // this on block is to re-fetch the broken img links when back online
+    on: {
+      // Trigger as soon as the swipe starts
+      slideChange: function() {
+        // We use a tiny timeout to ensure the DOM has updated the 'active' class
+        setTimeout(() => {
+          const activeSlide = this.el.querySelector('.swiper-slide-active');
+          if (activeSlide) {
+            const img = activeSlide.querySelector('img');
+            // check if it's a broken songsheet. It's broken if img.naturalWidth === 0
+            if (img && img.src.includes('songsheets/') && img.naturalWidth === 0) {
+              const title = img.dataset.title;
+              console.log(`Refetching: ${title}`);
+              // The '?refetch=' + Date.now() part clears the browser's memory and do a refetch
+              img.src = `songsheets/${title}.png?refetch=` + Date.now();
+
+            }
+          }
+        }, 50); // 50ms is unnoticeable but enough for Swiper to sync
+      }
+        
+    } // end on
+    
+});
+
+
 
 // load and update the swiper
 function syncSwiper() {
@@ -1783,6 +1880,7 @@ function updateTimeDisplay() {
 }
 
 // Display the Music Player popup
+/*
 function openMusicPlayer() {
   document.getElementById('musicPlayerOverlay').classList.add('show');
   
@@ -1816,6 +1914,50 @@ function openMusicPlayer() {
 
   }
 }
+*/
+
+function openMusicPlayer() {
+  document.getElementById('musicPlayerOverlay').classList.add('show');
+  
+  // get filename
+  let filename = currentListPages[swiper.activeIndex];
+  // remove the page number from the end of the name, e.g. the 2 from Serenade - Liszt2
+  filename = filename.replace(/\d+$/, ''); // remove the page number at the end
+  
+  if (!playing) {
+    audio.src = "audios/"+filename+".mp3"; // Set the audio source when popup opens
+    audio.load(); // Ensure the audio is ready for playback
+
+    // Disable the controls initially
+    playBtn.disabled = true;
+    pauseBtn.disabled = true;
+    stopBtn.disabled = true;
+    progressBar.disabled = true;
+    
+    // Check if the file exists (after loading data)
+    audio.onloadeddata = () => {
+      //audiofileAvailable = true;
+      audioFilenameDiv.textContent = filename;  // Display the song name
+      updateTimeDisplay();  // Show the initial time remaining
+      playBtn.disabled = false;
+    };
+
+    // If the file can't be loaded, show error
+    audio.onerror = () => {
+      // If it fails and we haven't tried a 'retry' yet
+      if (!audio.src.includes('?retry=')) {
+        console.log("Audio load failed, trying offline-friendly fetch...");
+        const originalSrc = audio.src;
+        audio.src = originalSrc + "?retry=" + Date.now();
+        audio.load();
+      } else {
+        audioFilenameDiv.textContent = "No audio file";
+      }      
+    };
+
+  }
+}
+
 
 
 function closeMusicPlayer() {
@@ -2579,5 +2721,6 @@ setInterval(() => {
       reg.update();  // step 1
     }
   });
+}, 24 * 60 * 60 * 1000); // 6 * 60 * 60 * 1000 every 24 hours
 //}, 6 * 60 * 60 * 1000); // 6 * 60 * 60 * 1000 every 6 hours
-}, 15 * 1000);
+//}, 15 * 1000);
