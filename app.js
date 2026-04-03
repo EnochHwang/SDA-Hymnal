@@ -946,9 +946,8 @@ function createBookmarkList() {
   // check for bookmark list empty
   if (currentBookmarkFolderItems.length === 0) {
     if (currentBookmarkFolder == "Folder 4") {  // My Songs
-      bookmarkList.innerHTML = `<div style="padding: 20px; text-align: center; color: #888;">My Songs feature coming soon</div>`;
+      bookmarkList.innerHTML = `<div style="padding: 20px; text-align: center; color: #888;">Select Import My Songs to import a song</div>`;
     } else {
-      //bookmarkList.innerHTML = `<div style="padding: 20px; text-align: center; color: #888;">No bookmarks in ${currentBookmarkFolder}</div>`;
       bookmarkList.innerHTML = `<div style="padding: 20px; text-align: center; color: #888;">Long press song or index to add bookmark</div>`;
     }
     return;
@@ -2721,6 +2720,6 @@ setInterval(() => {
       reg.update();  // step 1
     }
   });
-//}, 24 * 60 * 60 * 1000); // every 24 hours
+}, 24 * 60 * 60 * 1000); // every 24 hours
 //}, 1 * 60 * 60 * 1000);  // every 1 hour
-}, 15 * 1000);           // every 15 seconds
+//}, 15 * 1000);           // every 15 seconds
