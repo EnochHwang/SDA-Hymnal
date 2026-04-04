@@ -34,6 +34,9 @@ window.addEventListener('load', async () => {
       // Jump to the specific song
       swiper.slideTo(parseInt(savedIndex), 0);
   }
+  
+  // Prevent screen timeout
+  requestWakeLock();
 });
 
 // This is called when the app is moved to the foreground or background
@@ -60,6 +63,7 @@ window.addEventListener('online', () => {
     // If the image is broken (naturalWidth is 0)
     if (img.naturalWidth === 0) {
       const title = img.dataset.title;
+      console.log(`online event:Refetching: ${title}`);
       // The '?refetch=' + Date.now() part clears the browser's memory and do a refetch
       img.src = `songsheets/${title}.png?refetch=` + Date.now();
     }
@@ -177,7 +181,7 @@ let swiper = new Swiper(".swiper", {
             // check if it's a broken songsheet. It's broken if img.naturalWidth === 0
             if (img && img.src.includes('songsheets/') && img.naturalWidth === 0) {
               const title = img.dataset.title;
-              console.log(`Refetching: ${title}`);
+              console.log(`swiper:Refetching: ${title}`);
               // The '?refetch=' + Date.now() part clears the browser's memory and do a refetch
               img.src = `songsheets/${title}.png?refetch=` + Date.now();
 
@@ -428,6 +432,8 @@ function closeMoreMenu() {
 // or "A Child of the King 468" (for ALPHABETIC_INDEX)
 // pageIndex >= 0 when called from handleBookmarkSelect. This is for when there are two or more of the same songname in the bookmark list
 // pageIndex == -1 when called from attachListItemEventHandler or renderSearchList, and this value is not used in displaySong
+/*
+// original
 function displaySong(songname, pageIndex) {
   // do the following only if not given the pageIndex from attachListItemEventHandler and renderSearchList
   if (pageIndex == -1) {
@@ -459,6 +465,201 @@ function displaySong(songname, pageIndex) {
     console.warn("Could not find page for: ", songname);
   }
 }
+*/
+
+function displaySong(songname, pageIndex) {
+  if (pageIndex == -1) {
+    let targetFilename = formatName(songname);
+
+    // 1. Try Exact Match (The most reliable)
+    pageIndex = currentListPages.findIndex(name => name === targetFilename);
+
+    // 2. If not found, look for page 1 of a multi-page set (e.g., "S1")
+    if (pageIndex == -1) {
+      pageIndex = currentListPages.findIndex(name => {
+        const suffix = name.slice(targetFilename.length);
+        // Match if it starts with the name and is followed ONLY by digits
+        return name.startsWith(targetFilename) && /^\d+$/.test(suffix);
+      });
+    }
+
+    // 3. Fallback to FIRSTLINE_INDEX (Strict match only!)
+    if (pageIndex == -1) { // song is not in currentListPages
+      // CHANGE: Look for an EXACT match for the songname in the first lines
+      const firstLineIdx = FIRSTLINE_INDEX.findIndex(name => name === songname);
+      
+      if (firstLineIdx !== -1) {
+        targetFilename = FIRSTLINE_PAGES[firstLineIdx];
+        // Find where that specific hymn is in the current swipe list
+        pageIndex = currentListPages.findIndex(name => name === targetFilename);
+      }
+    }
+
+  }
+
+  if (pageIndex !== -1) {
+    syncSwiper();
+    swiper.slideTo(pageIndex, 0);
+  } else {
+    console.warn("Could not find page for: ", songname);
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+///// Update the global variable currentListPages with all the pages for the songs in folderItems
+// return the swiper index for the given song
+/*
+// original
+function updateCurrentListPages(songindex, folderItems) {
+  const folderListPages = [];
+  let pageIndex = -1;
+
+  folderItems.forEach((item, index) => {
+    // 1. add all the pages for a multi-page song in NUMERIC_PAGES
+    // .filter() returns an array of all matches
+    let songPages = NUMERIC_PAGES.filter(p => p.startsWith(item) && p.slice(item.length).match(/^\d*$/));
+
+    // 2. song is not in NUMERIC_PAGES, see if it is in FIRSTLINE_INDEX
+    if (songPages.length === 0) {
+      const i = FIRSTLINE_INDEX.findIndex(name => name === item || name.startsWith(item));
+      if (i !== -1) {
+        const name = FIRSTLINE_PAGES[i];
+        songPages = NUMERIC_PAGES.filter(p => p.startsWith(name) && p.slice(name.length).match(/^\d*$/));
+      }
+    }
+    
+    // 3. song is not in FIRSTLINE_INDEX, see if it is in My Songs
+    if (songPages.length === 0) {
+      // if creating the list for the My Songs folder than just add that one item
+      if (currentBookmarkFolder === "Folder 4") {
+        songPages = [item];
+        
+      } else {  // otherwise it might be a multipage song so need to add all the pages for the song
+        const mySongs = JSON.parse(localStorage.getItem(APP_NAME + "_MySongs") || '{}');
+        const mySongKeys = Object.keys(mySongs);  // get a list of all the song names from My Songs
+
+        // get all the pages for the song. Search for matches like "SongName", "SongName 1", "SongName 2"
+        songPages = mySongKeys.filter(key => 
+          key === item || (key.startsWith(item) && key.slice(item.length).match(/^\s*\d*$/))
+        );
+
+        // sort numerically (so "Song 10" comes after "Song 2")
+        songPages.sort((a, b) => {
+          const numA = parseInt(a.slice(item.length)) || 0;
+          const numB = parseInt(b.slice(item.length)) || 0;
+          return numA - numB;
+        });
+      }
+
+    }
+
+    // if nothing found then just use the item itself
+    if (songPages.length === 0) {
+      songPages = [item];
+    }
+
+    // remove duplicates e.g. His Eye Is On the Sparrow occurs twice in the NUMERIC_PAGES list
+    songPages = [...new Set(songPages)];
+    
+    // Calculate the index for the swiper to jump to if needed
+    // set the actual pageIndex of the selected page in folderListPages
+    // this is needed if a song occurs more than once in the bookmark list
+    // and the second occurence of the song is selected
+    if (index == songindex) {
+      pageIndex = folderListPages.length;
+    }
+    
+    folderListPages.push(...songPages); // add pages to the list
+  });
+
+  // Update the global currentListPages
+  currentListPages = folderListPages;
+
+  return pageIndex;
+} // end updateCurrentListPages
+*/
+
+function updateCurrentListPages(songindex, folderItems) {
+  const folderListPages = [];
+  let pageIndex = -1;
+
+  folderItems.forEach((item, index) => {
+    // 1. add all the pages for a multi-page song in NUMERIC_PAGES
+    // .filter() returns an array of all matches
+    //let songPages = NUMERIC_PAGES.filter(p => p.startsWith(item) && p.slice(item.length).match(/^\d*$/));
+
+    // This regex ensures that after the 'item' string, there are only digits to the end of the string
+    let songPages = NUMERIC_PAGES.filter(p => {
+        if (p === item) return true; // Exact match
+        const suffix = p.slice(item.length);
+        return p.startsWith(item) && /^\d+$/.test(suffix); // Match "S1", "S2", but NOT "Sabbath"
+    });
+    
+    // 2. song is not in NUMERIC_PAGES, see if it is in FIRSTLINE_INDEX
+    if (songPages.length === 0) {
+      // Use === instead of .startsWith() to prevent "S" matching "Saving grace..."
+      const i = FIRSTLINE_INDEX.findIndex(name => name === item); 
+      
+      if (i !== -1) {
+        const name = FIRSTLINE_PAGES[i];
+        // Now find the pages for that specific hymn name
+        songPages = NUMERIC_PAGES.filter(p => p === name || (p.startsWith(name) && p.slice(name.length).match(/^\d+$/)));
+      }
+    }
+    
+    // 3. song is not in FIRSTLINE_INDEX, see if it is in My Songs
+    if (songPages.length === 0) {
+      // if creating the list for the My Songs folder than just add that one item
+      if (currentBookmarkFolder === "Folder 4") {
+        songPages = [item];
+        
+      } else {  // otherwise it might be a multipage song so need to add all the pages for the song
+        const mySongs = JSON.parse(localStorage.getItem(APP_NAME + "_MySongs") || '{}');
+        const mySongKeys = Object.keys(mySongs);  // get a list of all the song names from My Songs
+
+        // get all the pages for the song. Search for matches like "SongName", "SongName 1", "SongName 2"
+        songPages = mySongKeys.filter(key => 
+          key === item || (key.startsWith(item) && key.slice(item.length).match(/^\s*\d*$/))
+        );
+
+        // sort numerically (so "Song 10" comes after "Song 2")
+        songPages.sort((a, b) => {
+          const numA = parseInt(a.slice(item.length)) || 0;
+          const numB = parseInt(b.slice(item.length)) || 0;
+          return numA - numB;
+        });
+      }
+
+    }
+
+    // if nothing found then just use the item itself
+    if (songPages.length === 0) {
+      songPages = [item];
+    }
+
+    // remove duplicates e.g. His Eye Is On the Sparrow occurs twice in the NUMERIC_PAGES list
+    songPages = [...new Set(songPages)];
+    
+    // Calculate the index for the swiper to jump to if needed
+    // set the actual pageIndex of the selected page in folderListPages
+    // this is needed if a song occurs more than once in the bookmark list
+    // and the second occurence of the song is selected
+    if (index == songindex) {
+      pageIndex = folderListPages.length;
+    }
+    
+    folderListPages.push(...songPages); // add pages to the list
+  });
+
+  // Update the global currentListPages
+  currentListPages = folderListPages;
+
+  return pageIndex;
+} // end updateCurrentListPages
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1279,78 +1480,6 @@ function handleBookmarkSelect(songname, songindex, folderItems) {
 
 
 /////////////////////////////////////////////////////////////////////////
-///// Update the global variable currentListPages with all the pages for the songs in folderItems
-// return the swiper index for the given song
-function updateCurrentListPages(songindex, folderItems) {
-  const folderListPages = [];
-  let pageIndex = -1;
-
-  folderItems.forEach((item, index) => {
-    // 1. add all the pages for a multi-page song in NUMERIC_PAGES
-    // .filter() returns an array of all matches
-    let songPages = NUMERIC_PAGES.filter(p => p.startsWith(item) && p.slice(item.length).match(/^\d*$/));
-
-    // 2. song is not in NUMERIC_PAGES, see if it is in FIRSTLINE_INDEX
-    if (songPages.length === 0) {
-      const i = FIRSTLINE_INDEX.findIndex(name => name === item || name.startsWith(item));
-      if (i !== -1) {
-        const name = FIRSTLINE_PAGES[i];
-        songPages = NUMERIC_PAGES.filter(p => p.startsWith(name) && p.slice(name.length).match(/^\d*$/));
-      }
-    }
-    
-    // 3. song is not in FIRSTLINE_INDEX, see if it is in My Songs
-    if (songPages.length === 0) {
-      // if creating the list for the My Songs folder than just add that one item
-      if (currentBookmarkFolder === "Folder 4") {
-        songPages = [item];
-        
-      } else {  // otherwise it might be a multipage song so need to add all the pages for the song
-        const mySongs = JSON.parse(localStorage.getItem(APP_NAME + "_MySongs") || '{}');
-        const mySongKeys = Object.keys(mySongs);  // get a list of all the song names from My Songs
-
-        // get all the pages for the song. Search for matches like "SongName", "SongName 1", "SongName 2"
-        songPages = mySongKeys.filter(key => 
-          key === item || (key.startsWith(item) && key.slice(item.length).match(/^\s*\d*$/))
-        );
-
-        // sort numerically (so "Song 10" comes after "Song 2")
-        songPages.sort((a, b) => {
-          const numA = parseInt(a.slice(item.length)) || 0;
-          const numB = parseInt(b.slice(item.length)) || 0;
-          return numA - numB;
-        });
-      }
-
-    }
-
-    // if nothing found then just use the item itself
-    if (songPages.length === 0) {
-      songPages = [item];
-    }
-
-    // remove duplicates e.g. His Eye Is On the Sparrow occurs twice in the NUMERIC_PAGES list
-    songPages = [...new Set(songPages)];
-    
-    // Calculate the index for the swiper to jump to if needed
-    // set the actual pageIndex of the selected page in folderListPages
-    // this is needed if a song occurs more than once in the bookmark list
-    // and the second occurence of the song is selected
-    if (index == songindex) {
-      pageIndex = folderListPages.length;
-    }
-    
-    folderListPages.push(...songPages); // add pages to the list
-  });
-
-  // Update the global currentListPages
-  currentListPages = folderListPages;
-
-  return pageIndex;
-}
-
-
-/////////////////////////////////////////////////////////////////////////
 // Bookmark List - Drag to reorder item stuff
 
 // for auto scrolling the list when drag item to top or bottom
@@ -1842,204 +1971,6 @@ if (window.visualViewport) {
 
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
-// Music Player stuff
-const audio = document.getElementById("audio");
-const playBtn = document.getElementById("btnPlay");
-const pauseBtn = document.getElementById("btnPause");
-const stopBtn = document.getElementById("btnStop");
-const progressBar = document.getElementById("progressBar");
-const elapsedTime = document.getElementById("elapsed");
-const remainingTime = document.getElementById("remaining");
-const audioFilenameDiv = document.getElementById("audioFilename");
-
-let audiofileAvailable = false;
-let playing = false;
-
-// Format time from seconds to MM:SS
-function formatTime(seconds) {
-  seconds = Math.floor(seconds);
-  let m = Math.floor(seconds / 60);
-  let s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
-
-// Update time display and progress bar
-function updateTimeDisplay() {
-  if (audio.duration) {
-    elapsedTime.textContent = formatTime(audio.currentTime);
-    remainingTime.textContent = formatTime(audio.duration - audio.currentTime);
-    progressBar.max = audio.duration;
-    progressBar.value = audio.currentTime;
-  } else {
-    elapsedTime.textContent = "0:00";
-    remainingTime.textContent = "0:00";
-    progressBar.max = 100;
-    progressBar.value = 0;
-  }
-}
-
-// Display the Music Player popup
-/*
-function openMusicPlayer() {
-  document.getElementById('musicPlayerOverlay').classList.add('show');
-  
-  // get filename
-  let filename = currentListPages[swiper.activeIndex];
-  // remove the page number from the end of the name, e.g. the 2 from Serenade - Liszt2
-  filename = filename.replace(/\d+$/, ''); // remove the page number at the end
-  
-  if (!playing) {
-    audio.src = "audios/"+filename+".mp3"; // Set the audio source when popup opens
-    audio.load(); // Ensure the audio is ready for playback
-
-    // Disable the controls initially
-    playBtn.disabled = true;
-    pauseBtn.disabled = true;
-    stopBtn.disabled = true;
-    progressBar.disabled = true;
-    
-    // Check if the file exists (after loading data)
-    audio.onloadeddata = () => {
-      //audiofileAvailable = true;
-      audioFilenameDiv.textContent = filename;  // Display the song name
-      updateTimeDisplay();  // Show the initial time remaining
-      playBtn.disabled = false;
-    };
-
-    // If the file can't be loaded, show error
-    audio.onerror = () => {
-      audioFilenameDiv.textContent = "No audio file";  // Show error message
-    };
-
-  }
-}
-*/
-
-function openMusicPlayer() {
-  document.getElementById('musicPlayerOverlay').classList.add('show');
-  
-  // get filename
-  let filename = currentListPages[swiper.activeIndex];
-  // remove the page number from the end of the name, e.g. the 2 from Serenade - Liszt2
-  filename = filename.replace(/\d+$/, ''); // remove the page number at the end
-  
-  if (!playing) {
-    audio.src = "audios/"+filename+".mp3"; // Set the audio source when popup opens
-    audio.load(); // Ensure the audio is ready for playback
-
-    // Disable the controls initially
-    playBtn.disabled = true;
-    pauseBtn.disabled = true;
-    stopBtn.disabled = true;
-    progressBar.disabled = true;
-    
-    // Check if the file exists (after loading data)
-    audio.onloadeddata = () => {
-      //audiofileAvailable = true;
-      audioFilenameDiv.textContent = filename;  // Display the song name
-      updateTimeDisplay();  // Show the initial time remaining
-      playBtn.disabled = false;
-    };
-
-    // If the file can't be loaded, show error
-    audio.onerror = () => {
-      audioFilenameDiv.textContent = "No audio file";
-      // If it fails and we haven't tried a 'retry' yet
-      // if (!audio.src.includes('?retry=')) {
-        // console.log("Audio load failed, trying offline-friendly fetch...");
-        // const originalSrc = audio.src;
-        // audio.src = originalSrc + "?retry=" + Date.now();
-        // audio.load();
-      // } else {
-        // audioFilenameDiv.textContent = "No audio file";
-      // }      
-    };
-
-  }
-}
-
-
-
-function closeMusicPlayer() {
-  document.getElementById('musicPlayerOverlay').classList.remove('show');
-}
-
-// Detect Esc key to close the Music Player popup
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeMusicPlayer();
-});
-
-function playAudio() {
-  audio.play();
-  playBtn.disabled = true;
-  pauseBtn.disabled = false;
-  stopBtn.disabled = false;
-  progressBar.disabled = false;
-  playing = true;
-}
-
-function pauseAudio() {
-  audio.pause();
-  playBtn.disabled = false;
-  pauseBtn.disabled = true;
-}
-
-function stopAudio() {
-  audio.pause();
-  audio.currentTime = 0;
-  playBtn.disabled = false;
-  pauseBtn.disabled = true;
-  stopBtn.disabled = true;
-  progressBar.disabled = true;
-  updateTimeDisplay();
-  playing = false;
-}
-/*
-audio.addEventListener("loadeddata", () => {
-  audiofileAvailable = true;
-});
-
-audio.addEventListener("loadedmetadata", () => {
-  if (musicPlayerIsOpen && audiofileAvailable) {
-    updateTimeDisplay();
-  }
-});
-
-audio.addEventListener("error", () => {
-  console.warn("Audio file not found or cannot be loaded.");
-  audiofileAvailable = false;
-});
-*/
-
-
-audio.addEventListener("timeupdate", () => {
-  updateTimeDisplay();
-});
-
-progressBar.addEventListener("input", () => {
-  audio.currentTime = progressBar.value;
-});
-
-// triggers when song has ended
-audio.addEventListener("ended", () => {
-  stopAudio();
-});
-
-
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-// Toast message at bottom stuff
-function showToast(message) {
-  const toast = document.getElementById("toast");
-  toast.textContent = message;
-  toast.className = "show";
-  setTimeout(() => {
-    toast.className = toast.className.replace("show", "");
-  }, 2500); // hide after 2.5s
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
 //// Helper function to convert *_PAGES format to *_INDEX format
 // "12 Joyful, Joyful, We Adore Thee" to "Joyful, Joyful, We Adore Thee 12"
 /*
@@ -2101,6 +2032,7 @@ function formatName(name) {
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 //// Helper function to attach the touch and mouse event handlers for given song
 // Called by NUMERIC_INDEX.forEach and ALPHABETIC_INDEX.forEach, and renderSearchList
@@ -2186,6 +2118,155 @@ function attachListItemEventHandler(item, songname) {
   item.addEventListener('mouseup', endPress);
   item.addEventListener('mouseleave', cancelPress);  
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+// Music Player stuff
+const audio = document.getElementById("audio");
+const playBtn = document.getElementById("btnPlay");
+const pauseBtn = document.getElementById("btnPause");
+const stopBtn = document.getElementById("btnStop");
+const progressBar = document.getElementById("progressBar");
+const elapsedTime = document.getElementById("elapsed");
+const remainingTime = document.getElementById("remaining");
+const audioFilenameDiv = document.getElementById("audioFilename");
+
+let audiofileAvailable = false;
+let playing = false;
+
+// Format time from seconds to MM:SS
+function formatTime(seconds) {
+  seconds = Math.floor(seconds);
+  let m = Math.floor(seconds / 60);
+  let s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// Update time display and progress bar
+function updateTimeDisplay() {
+  if (audio.duration) {
+    elapsedTime.textContent = formatTime(audio.currentTime);
+    remainingTime.textContent = formatTime(audio.duration - audio.currentTime);
+    progressBar.max = audio.duration;
+    progressBar.value = audio.currentTime;
+  } else {
+    elapsedTime.textContent = "0:00";
+    remainingTime.textContent = "0:00";
+    progressBar.max = 100;
+    progressBar.value = 0;
+  }
+}
+
+// Display the Music Player popup
+function openMusicPlayer() {
+  document.getElementById('musicPlayerOverlay').classList.add('show');
+  
+  // get filename
+  let filename = currentListPages[swiper.activeIndex];
+  // remove the page number from the end of the name, e.g. the 2 from Serenade - Liszt2
+  filename = filename.replace(/\d+$/, ''); // remove the page number at the end
+  
+  if (!playing) {
+    audio.src = "audios/"+filename+".mp3"; // Set the audio source when popup opens
+    audio.load(); // Ensure the audio is ready for playback
+
+    // Disable the controls initially
+    playBtn.disabled = true;
+    pauseBtn.disabled = true;
+    stopBtn.disabled = true;
+    progressBar.disabled = true;
+    
+    // Check if the file exists (after loading data)
+    audio.onloadeddata = () => {
+      //audiofileAvailable = true;
+      audioFilenameDiv.textContent = filename;  // Display the song name
+      updateTimeDisplay();  // Show the initial time remaining
+      playBtn.disabled = false;
+    };
+
+    // If the file can't be loaded, show error
+    audio.onerror = () => {
+      audioFilenameDiv.textContent = "No audio file";
+      // I don't think the following is needed
+      // If it fails and we haven't tried a 'retry' yet
+      // if (!audio.src.includes('?retry=')) {
+        // console.log("Audio load failed, trying offline-friendly fetch...");
+        // const originalSrc = audio.src;
+        // audio.src = originalSrc + "?retry=" + Date.now();
+        // audio.load();
+      // } else {
+        // audioFilenameDiv.textContent = "No audio file";
+      // }      
+    };
+
+  }
+}
+
+function closeMusicPlayer() {
+  document.getElementById('musicPlayerOverlay').classList.remove('show');
+}
+
+// Detect Esc key to close the Music Player popup
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeMusicPlayer();
+});
+
+function playAudio() {
+  audio.play();
+  playBtn.disabled = true;
+  pauseBtn.disabled = false;
+  stopBtn.disabled = false;
+  progressBar.disabled = false;
+  playing = true;
+}
+
+function pauseAudio() {
+  audio.pause();
+  playBtn.disabled = false;
+  pauseBtn.disabled = true;
+}
+
+function stopAudio() {
+  audio.pause();
+  audio.currentTime = 0;
+  playBtn.disabled = false;
+  pauseBtn.disabled = true;
+  stopBtn.disabled = true;
+  progressBar.disabled = true;
+  updateTimeDisplay();
+  playing = false;
+}
+/*
+audio.addEventListener("loadeddata", () => {
+  audiofileAvailable = true;
+});
+
+audio.addEventListener("loadedmetadata", () => {
+  if (musicPlayerIsOpen && audiofileAvailable) {
+    updateTimeDisplay();
+  }
+});
+
+audio.addEventListener("error", () => {
+  console.warn("Audio file not found or cannot be loaded.");
+  audiofileAvailable = false;
+});
+*/
+
+
+audio.addEventListener("timeupdate", () => {
+  updateTimeDisplay();
+});
+
+progressBar.addEventListener("input", () => {
+  audio.currentTime = progressBar.value;
+});
+
+// triggers when song has ended
+audio.addEventListener("ended", () => {
+  stopAudio();
+});
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -2355,17 +2436,7 @@ function editExistingMySong(songName) {
 // fills in the data in the Edit My Songs popup
 function populateEditMySongs(name, imageData, sizeText) {
     originalEditName = name;  // store the name to check for renames later
-    /*
-    // 1. Check if song exists in Folder 4
-    const bookmarks = JSON.parse(localStorage.getItem(APP_NAME + "_bookmarks") || "{}");
-    const folder4 = bookmarks["Folder 4"] || [];
-    
-    if (folder4.includes(name)) {
-        document.getElementById('doneEditMySongs').innerText = "UPDATE";
-    } else {
-        document.getElementById('doneEditMySongs').innerText = "DONE";
-    }
-    */
+
     // 1. Set text fields
     const inputFileName = document.getElementById('inputFileName');
     inputFileName.value = name;
@@ -2409,52 +2480,51 @@ function updatePageNumberFromInput(name) {
 
 // This is called when the DONE button in Edit My Songs popup is pressed
 function doneEditMySongs() {
-  // get the input filename and strip out all the spaces (if any) before the page number at the end
   const filename = document.getElementById('inputFileName').value.trim().replace(/\s+(?=\d+$)/, '');
   const imageElement = document.getElementById('imagePreview');
 
   if (!filename || !imageElement.src) return;
 
-  const compressedData = compressImage(imageElement); // compress image
+  const compressedData = compressImage(imageElement); 
   
   try {
     // 1. Check if filename already exists in My Songs
     const mySongs = JSON.parse(localStorage.getItem(APP_NAME + "_MySongs") || '{}');
-    // If the new name already exists AND it's not the song we are currently editing
     if (mySongs[filename] && filename !== originalEditName) {
       showToast("Name already exists. Please choose a different name.");
-      return; // Stop the save process
+      return; // Don't save
     }
     
     // 2. Update My Songs bookmark
     const bookmarks = JSON.parse(localStorage.getItem(APP_NAME + "_bookmarks") || "{}");
-    let folder4 = bookmarks["Folder 4"] || [];
 
-    if (!folder4.includes(filename)) {  // is it a new song?
-      // it's a new song, add it to the end of folder4
-      folder4.push(filename);
-      
-    // otherwise, is it a rename?
-    } else if (originalEditName && filename !== originalEditName) {
-      // remove the old image data to save space
+    // 3. Is it a Rename?
+    if (originalEditName && originalEditName !== filename) {
+      // Remove old image data
       delete mySongs[originalEditName];
       
-      // find the position of the old name in folder4
-      const oldIndex = folder4.indexOf(originalEditName);
-      if (oldIndex !== -1) {
-        // replace the old name with the new name at the exact same index
-        folder4[oldIndex] = filename;
-      } else if (!folder4.includes(filename)) {
-        // If for some reason old name wasn't found, add it to the end of folder4
-        folder4.push(filename);
-      }
+      //  Loop through EVERY folder in bookmarks (Folder 1, 2, 3, 4, etc.)
+      Object.keys(bookmarks).forEach(folderKey => {
+        let currentFolder = bookmarks[folderKey];
+        // Find the index of the old name in this specific folder
+        const oldIndex = currentFolder.indexOf(originalEditName);
+        if (oldIndex !== -1) {
+          // Replace the old name with the new name at the exact same position
+          currentFolder[oldIndex] = filename;
+        }
+      });
+
     }
-    
-    // 3. Save updated folder4 bookmarks
-    bookmarks["Folder 4"] = folder4;
+
+    // 4. Add the new filename to folder4
+    if (!bookmarks["Folder 4"].includes(filename)) {
+      bookmarks["Folder 4"].push(filename);
+    }
+
+    // 5. Save updated folder4 bookmarks
     localStorage.setItem(APP_NAME + "_bookmarks", JSON.stringify(bookmarks));
 
-    // 4. Save the compressed new image data
+    // 6. Save the compressed new image data
     mySongs[filename] = compressedData;
     localStorage.setItem(APP_NAME + "_MySongs", JSON.stringify(mySongs));
       
@@ -2465,20 +2535,20 @@ function doneEditMySongs() {
 
   closeEditMySongs();
   
-  // --- AUTO-DISPLAY THE NEW/UPDATED SONG ---
-  const bookmarks = JSON.parse(localStorage.getItem(APP_NAME + "_bookmarks") || "{}");
-  const folderItems = bookmarks["Folder 4"] || [];
+  // Re-fetch to ensure we have the latest state for the UI update
+  const updatedBookmarks = JSON.parse(localStorage.getItem(APP_NAME + "_bookmarks") || "{}");
+  const folderItems = updatedBookmarks["Folder 4"] || [];
 
   if (folderItems.length > 0) {
-    // Find the actual index of the song we just saved
+    // Find the correct index of the song we just saved
     const currentSongIndex = folderItems.indexOf(filename); 
     const finalIndex = currentSongIndex !== -1 ? currentSongIndex : folderItems.length - 1;
-
     // Rebuild swiper and show the song
     handleBookmarkSelect(filename, finalIndex, folderItems);
     selectFolder(4);
   }
 } // end doneEditMySongs
+
 
 // This is called when the CANCEL button in Edit My Songs is pressed
 // Close the Edit My Songs popup
@@ -2635,21 +2705,37 @@ function handleEditKeydown(event) {
 
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
+// Toast message at bottom stuff
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.className = "show";
+  setTimeout(() => {
+    toast.className = toast.className.replace("show", "");
+  }, 2500); // hide after 2.5s
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 // Wake Lock to prevent device from going to sleep
 let wakeLock = null;
 
 const requestWakeLock = async () => {
-  try {
-    // Request a screen wake lock
-    wakeLock = await navigator.wakeLock.request('screen');
-    
-    // Listen for the release event
-    wakeLock.addEventListener('release', () => {
-      console.log('Wake Lock was released');
-    });
-    console.log('Wake Lock is active');
-  } catch (err) {
-    console.error(`${err.name}, ${err.message}`);
+  if ('wakeLock' in navigator) {  // Check if the browser supports the API
+    try {
+      // Request a screen wake lock
+      wakeLock = await navigator.wakeLock.request('screen');
+      
+      // Listen for the release event
+      wakeLock.addEventListener('release', () => {
+        console.log('Wake Lock was released');
+      });
+    } catch (err) {
+      console.error(`${err.name}, ${err.message}`);
+    }
+  } else {
+    console.warn("Wake Lock API not supported in this browser.");
   }
 };
 
@@ -2663,6 +2749,7 @@ function revealUpdateMenuItem() {
   if (updateItem) {
     updateItem.style.display = 'flex'; // Use flex to match your other items
     console.log("SW 4:Notify user of new updates");
+    showToast("New updates available");
   }
 }
 
