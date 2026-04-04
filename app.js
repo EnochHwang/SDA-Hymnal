@@ -131,7 +131,7 @@ let swiper = new Swiper(".swiper", {
     zoom: {
         maxRatio: 5,
         minRatio: 1,
-        toggle: false // DISABLE Double-Tap Zoom (Crucial for Long Press)
+        toggle: false // disable Double-Tap Zoom (Crucial for Long Press)
     },
     grabCursor: true,
     speed: 500,
@@ -157,12 +157,11 @@ let swiper = new Swiper(".swiper", {
           img.src = mySongs[title];
           
         } else {  // it's a regular song in songsheet. Fetch it from cache or network
-          //console.log("swiper loading ",title);
           img.src = `songsheets/${title}.png`;
         }
 
         img.alt = title;
-        img.dataset.title = title;  // IMPORTANT: Store the title here so the Wrapper can find it later
+        img.dataset.title = title;  // Store the title here so the Wrapper can find it later
         swiper_zoom.appendChild(img);
         swiper_slide.appendChild(swiper_zoom);
         return swiper_slide;
@@ -260,8 +259,6 @@ function onMenuPress(id) {
       let currentFullTitle = currentListPages[swiper.activeIndex];
       if (currentFullTitle) {
         // extract number at the end for multi-page
-        // \d+ matches one or more digits
-        // $ ensures they are at the very end of the string
         let baseSongName = currentFullTitle.replace(/\d+$/, '');
 
         // Find the index of the very first page for this song in the current list
@@ -369,13 +366,11 @@ function handleMoreAction(action) {
   switch(action) {
     case 'import':
       openImportMySongs();
-//			document.getElementById('settingsOverlay').style.display = 'flex';
-//      showToast("Import songs coming soon");
       break;
       
     case 'share':
       if (navigator.share) {
-        navigator.share({ title: 'Piano Book', url: window.location.href });
+        navigator.share({ title: APP_NAME, url: window.location.href });
       }
       break;
       
@@ -474,7 +469,7 @@ function displaySong(songname, pageIndex) {
     // 1. Try Exact Match (The most reliable)
     pageIndex = currentListPages.findIndex(name => name === targetFilename);
 
-    // 2. If not found, look for page 1 of a multi-page set (e.g., "S1")
+    // 2. If not found, look for page 1 of a multi-page song
     if (pageIndex == -1) {
       pageIndex = currentListPages.findIndex(name => {
         const suffix = name.slice(targetFilename.length);
@@ -485,12 +480,12 @@ function displaySong(songname, pageIndex) {
 
     // 3. Fallback to FIRSTLINE_INDEX (Strict match only!)
     if (pageIndex == -1) { // song is not in currentListPages
-      // CHANGE: Look for an EXACT match for the songname in the first lines
+      // Look for an EXACT match for the songname in the first lines
       const firstLineIdx = FIRSTLINE_INDEX.findIndex(name => name === songname);
       
       if (firstLineIdx !== -1) {
         targetFilename = FIRSTLINE_PAGES[firstLineIdx];
-        // Find where that specific hymn is in the current swipe list
+        // Find where that specific song is in the current swipe list
         pageIndex = currentListPages.findIndex(name => name === targetFilename);
       }
     }
@@ -908,7 +903,7 @@ swiperWrapper.addEventListener('pointerdown', (e) => {
   startY = e.clientY;
   
   longPressTimer = setTimeout(() => {
-    // --- LONG PRESS ADD BOOKMARK LOGIC ---
+    // --- LONG PRESS SONG SHEET ---
     const index = swiper.activeIndex; // get the current active song index
     const songname = swiper.virtual.slides[index]; // get the page
     if (songname) {
@@ -1065,7 +1060,7 @@ document.querySelectorAll('.tab-btn').forEach(button => {
   const endPress = (e) => {
     clearTimeout(longpressTimer);
     if (!isLongPress) {
-      // --- CLICK FOLDER TAB ---
+      // --- SHORT PRESS FOLDER TAB ---
       const folderId = parseInt(button.getAttribute('bookmarkFolder'));
       selectFolder(folderId);
     }
@@ -1088,12 +1083,17 @@ document.querySelectorAll('.tab-btn').forEach(button => {
 
 // This function runs when you long-press a folder tab
 // This deletes all the items in the selected folder
+// --- LONG PRESS FOLDER TAB ---
 function handleFolderLongPress(folderId) {
-  //const folderName = "Folder " + folderId;
+  if (folderId === 4) {
+    showToast("Cannot delete all items in My Songs");
+    return; // can't delete My Songs folder
+  }
+  
   if (currentBookmarkFolder === "Folder " + folderId) {
     const bookmarks = JSON.parse(localStorage.getItem(APP_NAME+"_bookmarks") || "{}");
     
-    // SAFETY CHECK: Ensure the folder exists in the object and has items
+    // Ensure the folder exists in the object and has items
     if (bookmarks[currentBookmarkFolder] && bookmarks[currentBookmarkFolder].length > 0) {
       
       const toast = document.getElementById('confirm-toast');
@@ -1115,11 +1115,16 @@ function handleFolderLongPress(folderId) {
       document.getElementById('confirmCancelBtn').onclick = () => { // Cancel clear button clicked
         toast.classList.remove('show');
       };
+      
+    } else {
+      showToast("No items to clear");
     }
+    
   }
 }
 
 // This function runs when you press a folder tab
+// --- SHORT PRESS FOLDER TAB ---
 function selectFolder(folderId) {
   const tabs = document.querySelectorAll('.tab-btn');
   tabs.forEach((tab, index) => {
@@ -1136,7 +1141,7 @@ function selectFolder(folderId) {
 
 
 ///// Bookmark List - 
-///// Part A: Structure the List
+///// Part A: Create the List
 function createBookmarkList() {
   // retrieve bookmark folder items from local storage
   const bookmarks = JSON.parse(localStorage.getItem(APP_NAME+"_bookmarks") || "{}");
@@ -1282,7 +1287,7 @@ function onSwipeStart(e, songname) {
   
   // check for long press of item
   longpressTimeout = setTimeout(() => {
-    // --- LONG PRESS ADD BOOKMARK LOGIC ---
+    // --- LONG PRESS BOOKMARK LIST ---
     longPressed = true;
     addBookmarkMenuOverlay.dataset.songname = songname; // pass songname to the addBookmarkMenuOverlay.addEventListener
     addBookmarkMenuOverlay.style.display = "flex";  // show Add Bookmark Menu popup window
@@ -1438,6 +1443,7 @@ function onSwipeEnd(e) {
       e.preventDefault();   // 🚫 block the synthetic click
       e.stopPropagation();  // 🚫 block bubbling
       if (!shortPressHandled) {
+        // --- SHORT PRESS BOOKMARK LIST ---
         // item click detected. Display songsheet
         shortPressHandled = true;
         // 1. Retrieve the song name and index from the item's dataset
@@ -1469,6 +1475,7 @@ function onSwipeEnd(e) {
 /////////////////////////////////////////////////////////////////////////
 ///// Display the songsheet when a bookmark item is clicked
 ///// Updates the currentListPages global variable
+// --- SHORT PRESS BOOKMARK LIST ---
 function handleBookmarkSelect(songname, songindex, folderItems) {
   stopAudio();
   bookmarkListContainer.style.display = 'none';
@@ -1838,7 +1845,7 @@ function showUndoToast() {
 
 // RESTORE item when bookmark UNDO button is clicked
 document.getElementById('undoBtn').addEventListener('click', (e) => {
-  // 1. IMPORTANT: Prevent this click from bubbling up to lists behind the toast
+  // 1. Prevent this click from bubbling up to lists behind the toast
   e.stopPropagation();
 
   if (lastDeletedItem) {
@@ -1923,6 +1930,7 @@ function renderSearchList(songs) {
   if (songs.length === 1) {
     const songname = songs[0];
     closeSearch();
+    // --- SHORT PRESS SEARCH LIST ---
     displaySong(songname, -1); // --- display the song. -1 for songindex means don't use the index
     return;
   }
@@ -2055,7 +2063,7 @@ function attachListItemEventHandler(item, songname) {
     e.stopPropagation();
 
     longpressTimer = setTimeout(() => {
-      // --- LONG PRESS ADD BOOKMARK LOGIC ---
+      // --- LONG PRESS INDEX LIST ---
       isLongPress = true;
       addBookmarkMenuOverlay.dataset.songname = songname; // pass songname to the addBookmarkMenuOverlay.addEventListener
       addBookmarkMenuOverlay.style.display = "flex";  // show Add Bookmark Menu popup window
@@ -2066,7 +2074,7 @@ function attachListItemEventHandler(item, songname) {
   const endPress = (e) => {
     clearTimeout(longpressTimer);
     if (!isLongPress && !isScrolling) {
-      // --- CLICK DISPLAY SONG LOGIC ---
+      // --- SHORT PRESS INDEX LIST ---
       stopAudio();
       closeSearch();
       numericList.style.display = 'none';
@@ -2130,9 +2138,9 @@ const stopBtn = document.getElementById("btnStop");
 const progressBar = document.getElementById("progressBar");
 const elapsedTime = document.getElementById("elapsed");
 const remainingTime = document.getElementById("remaining");
-const audioFilenameDiv = document.getElementById("audioFilename");
+const audioFilename = document.getElementById("audioFilename");
 
-let audiofileAvailable = false;
+//let audiofileAvailable = false;
 let playing = false;
 
 // Format time from seconds to MM:SS
@@ -2176,18 +2184,19 @@ function openMusicPlayer() {
     pauseBtn.disabled = true;
     stopBtn.disabled = true;
     progressBar.disabled = true;
+    audioFilename.textContent = "";
     
     // Check if the file exists (after loading data)
     audio.onloadeddata = () => {
       //audiofileAvailable = true;
-      audioFilenameDiv.textContent = filename;  // Display the song name
+      audioFilename.textContent = filename;  // Display the song name
       updateTimeDisplay();  // Show the initial time remaining
       playBtn.disabled = false;
     };
 
     // If the file can't be loaded, show error
     audio.onerror = () => {
-      audioFilenameDiv.textContent = "No audio file";
+      audioFilename.textContent = "No audio file";
       // I don't think the following is needed
       // If it fails and we haven't tried a 'retry' yet
       // if (!audio.src.includes('?retry=')) {
@@ -2196,7 +2205,7 @@ function openMusicPlayer() {
         // audio.src = originalSrc + "?retry=" + Date.now();
         // audio.load();
       // } else {
-        // audioFilenameDiv.textContent = "No audio file";
+        // audioFilename.textContent = "No audio file";
       // }      
     };
 
@@ -2230,7 +2239,12 @@ function pauseAudio() {
 function stopAudio() {
   audio.pause();
   audio.currentTime = 0;
-  playBtn.disabled = false;
+  const audioFilename = document.getElementById("audioFilename");
+  if (audioFilename.textContent === "No audio file") {
+    playBtn.disabled = true;
+  } else {
+    playBtn.disabled = false;
+  }
   pauseBtn.disabled = true;
   stopBtn.disabled = true;
   progressBar.disabled = true;
@@ -2517,6 +2531,9 @@ function doneEditMySongs() {
     }
 
     // 4. Add the new filename to folder4
+    if (!bookmarks["Folder 4"]) { // if Folder 4 doesn't exist, create it as an empty array
+      bookmarks["Folder 4"] = [];
+    }
     if (!bookmarks["Folder 4"].includes(filename)) {
       bookmarks["Folder 4"].push(filename);
     }
@@ -2529,8 +2546,8 @@ function doneEditMySongs() {
     localStorage.setItem(APP_NAME + "_MySongs", JSON.stringify(mySongs));
       
   } catch (error) {
-      showToast("Local storage is full");
-      return; 
+    showToast("Local storage is full");
+    return; 
   }
 
   closeEditMySongs();
@@ -2809,6 +2826,6 @@ setInterval(() => {
       reg.update();  // step 1
     }
   });
-}, 24 * 60 * 60 * 1000); // every 24 hours
+//}, 24 * 60 * 60 * 1000); // every 24 hours
 //}, 1 * 60 * 60 * 1000);  // every 1 hour
-//}, 15 * 1000);           // every 15 seconds
+}, 15 * 1000);           // every 15 seconds

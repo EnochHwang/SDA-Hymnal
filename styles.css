@@ -517,51 +517,6 @@ body {
 
 
 /*******************************************************************/
-/*  Swipe to Delete Undo toast and Bookmark Folder Delete toast */
-#undo-toast, #confirm-toast {
-  position: fixed;
-  left: 50%;
-  bottom: 24px;
-  transform: translateX(-50%);
-  z-index: 2000;         /* Increased to ensure it's above all lists */
-
-  width: 95%;
-  max-width: 500px;
-  min-height: 20px;      /* Ensure height for visibility */
-  padding: 12px 16px;
-  border-radius: 10px;
-
-  background-color: #333;
-  color: #fff;
-  display: flex;         /* Use flex for internal layout */
-  justify-content: space-between;
-  align-items: center;
-
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, bottom 0.3s ease, visibility 0.3s ease;
-}
-
-#undo-toast.show, #confirm-toast.show {
-  visibility: visible;
-  opacity: 1;
-  bottom: 40px; 
-}
-
-#undo-toast button, #confirm-toast button {
-  background: transparent;
-  color: white;
-  border: none;
-  font-family: sans-serif;
-  font-size: 16px;
-  font-weight: bold;
-  text-transform: uppercase;
-  cursor: pointer;
-  padding: 8px 12px;   /* Added padding for a larger hit area */
-}
-
-
-/*******************************************************************/
 /*  Music Player and Import My Songs */
 /*  Music Player overlay (dark transparent background) */
 .musicPlayerOverlay, .importMySongsOverlay, .editMySongsOverlay {
@@ -658,27 +613,59 @@ input[type=range] {
 
 
 /*******************************************************************/
-/*  Toast message at bottom */
-#toast {
+/*  Swipe to Delete Undo toast, Bookmark Folder Delete toast, and Toast */
+#undo-toast, #confirm-toast, #toast {
   position: fixed;
   left: 50%;
   bottom: 24px;
   transform: translateX(-50%);
-  z-index: 1000;
-
-  width: 95%;            /* almost full width */
-  max-width: 500px;      /* optional limit on very wide screens */
+  width: 85%;
+  max-width: 500px;
   padding: 12px 16px;
   border-radius: 10px;
-
   background-color: #333;
   color: #fff;
-  text-align: center;
-  font-size: 14px;
+  z-index: 1000;         /* Increased to ensure it's above all lists */
 
+  display: flex;
+  align-items: center;
+  box-sizing: border-box; /* Ensures padding doesn't add to width/height */
+  height: 35px;         /* fixed height for all */
+  
+  font-size: 14px;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, bottom 0.3s;
+  transition: opacity 0.3s ease, bottom 0.3s ease, visibility 0.3s ease;
+}
+
+#undo-toast, #confirm-toast {
+  justify-content: space-between;
+}
+
+#undo-toast.show, #confirm-toast.show {
+  visibility: visible;
+  opacity: 1;
+  bottom: 40px; 
+}
+
+#undo-toast button, #confirm-toast button {
+  background: transparent;
+  color: white;
+  border: none;
+  font-family: sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 8px 12px;   /* Added padding for a larger hit area */
+}
+
+
+/*******************************************************************/
+/*  Toast message at bottom */
+#toast {
+  justify-content: center; /* Centers the text horizontally in flex */
+  text-align: center;
 }
 
 #toast.show {
