@@ -2184,7 +2184,7 @@ function openMusicPlayer() {
     pauseBtn.disabled = true;
     stopBtn.disabled = true;
     progressBar.disabled = true;
-    audioFilename.textContent = "";
+    audioFilename.textContent = "Loading...";
     
     // Check if the file exists (after loading data)
     audio.onloadeddata = () => {
