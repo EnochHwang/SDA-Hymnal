@@ -1,8 +1,4 @@
 background color
-#AC4141
-172, 65, 65
-
-NEW color
 #C8353B
 200, 53, 59
 
