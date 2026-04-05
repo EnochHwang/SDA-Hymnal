@@ -31,20 +31,33 @@ window.addEventListener('load', async () => {
       
       syncSwiper();
       
-      // Jump to the specific song
+      // Jump to the saved song
       swiper.slideTo(parseInt(savedIndex), 0);
   }
   
-  // Prevent screen timeout
+  // Request wake lock to prevent screen timeout
   requestWakeLock();
+
+  // Show update alert if there's an update
+  if (updateAlert) {
+    showToast("New updates available");
+    updateAlert = false;
+  }
+
 });
 
 // This is called when the app is moved to the foreground or background
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === "visible") {
-    // Re-request wake lock if it was active
+    // Request wake lock to prevent screen timeout
     if (wakeLock !== null) {
       await requestWakeLock();
+    }
+    
+    // Show update alert if there's an update
+    if (updateAlert) {
+      showToast("New updates available");
+      updateAlert = false;
     }
   } else {
     // Final safety save state when app goes to background
@@ -58,7 +71,7 @@ window.addEventListener('online', () => {
   //console.log("%c" + "Online", "color: green;");
   //showToast("Online");
   
-  // Find all images in the swiper
+  // load all broken images in the swiper
   document.querySelectorAll('.swiper-zoom-container img').forEach(img => {
     // If the image is broken (naturalWidth is 0)
     if (img.naturalWidth === 0) {
@@ -2761,12 +2774,18 @@ const requestWakeLock = async () => {
 //////////////////////////////////////////////////////////////////////////////////
 // Service Worker stuff
 // This is the UI to notify user of new updates
+let updateAlert = false;
 function revealUpdateMenuItem() {
   const updateItem = document.getElementById('updateMenuItem');
   if (updateItem) {
     updateItem.style.display = 'flex'; // Use flex to match your other items
+    updateAlert = true;
     console.log("SW 4:Notify user of new updates");
-    showToast("New updates available");
+    
+    // Show update alert
+    setTimeout(() => {
+      showToast("New updates available");
+    }, 500); // 500ms is usually enough to clear background throttling
   }
 }
 

@@ -1,4 +1,4 @@
-var CACHE_NAME = 'SDA-Hymnal-cache-v2';
+var CACHE_NAME = 'SDA-Hymnal-cache-v1';
 
 // include all the files for offline access
 // do not include sw.js
@@ -40,7 +40,7 @@ const CACHE_FILES = [
   'songsheets/12 Joyful, Joyful, We Adore Thee2.png',
   // 'songsheets/13 New Songs of Celebration Render.png',
   // 'songsheets/14 Let Us Praise the Name of the Lord.png',
-  // 'songsheets/15 My Maker and My King.png',
+  'songsheets/15 My Maker and My King.png',
   // 'songsheets/16 All People That on Earth Do Dwell.png',
   // 'songsheets/17 Lord of All Being, Throned Afar.png',
   // 'songsheets/18 O Morning Star, How Fair and Bright.png',
@@ -52,8 +52,8 @@ const CACHE_FILES = [
   // 'songsheets/24 Every Star Shall Sing a Carol.png',
   // 'songsheets/25 Praise the Lord, His Glories Show.png',
   // 'songsheets/26 Praise the Lord! You Heavens Adore Him.png',
-  // 'songsheets/27 Rejoice, Ye Pure in Heart!.png',
-  // 'songsheets/27 Rejoice, Ye Pure in Heart!2.png',
+  'songsheets/27 Rejoice, Ye Pure in Heart!.png',
+  'songsheets/27 Rejoice, Ye Pure in Heart!2.png',
   // 'songsheets/28 Praise We the Lord.png',
   // 'songsheets/29 Sing Praise to God.png',
   // 'songsheets/30 Holy God, We Praise Your Name.png',
@@ -99,8 +99,8 @@ const CACHE_FILES = [
   // 'songsheets/70 Praise Ye the Father.png',
   // 'songsheets/71 Come, Thou Almighty King.png',
   // 'songsheets/72 Creator of the Stars of Night.png',
-  // 'songsheets/73 Holy, Holy, Holy.png',
-  // 'songsheets/73 Holy, Holy, Holy2.png',
+  'songsheets/73 Holy, Holy, Holy.png',
+  'songsheets/73 Holy, Holy, Holy2.png',
   // 'songsheets/74 Like a River Glorious.png',
   // 'songsheets/75 The Wonder of It All.png',
   // 'songsheets/76 O Love That Wilt Not Let Me Go.png',
@@ -110,27 +110,27 @@ const CACHE_FILES = [
   // 'songsheets/80 O World of God.png',
   // 'songsheets/81 Though I Speak With Tongues.png',
   // 'songsheets/81 Though I Speak With Tongues2.png',
-  // 'songsheets/82 Before Jehovah\'s Awful Throne.png',
-  // 'songsheets/82 Before Jehovah\'s Awful Throne2.png',
-  // 'songsheets/83 O Worship the King.png',
+  'songsheets/82 Before Jehovah\'s Awful Throne.png',
+  'songsheets/82 Before Jehovah\'s Awful Throne2.png',
+  'songsheets/83 O Worship the King.png',
   // 'songsheets/84 God the Omnipotent.png',
   // 'songsheets/85 Eternal Father, Strong to Save.png',
-  // 'songsheets/86 How Great Thou Art.png',
-  // 'songsheets/86 How Great Thou Art2.png',
+  'songsheets/86 How Great Thou Art.png',
+  'songsheets/86 How Great Thou Art2.png',
   // 'songsheets/87 God Who Spoke in the Beginning.png',
   // 'songsheets/88 I Sing the Mighty Power of God.png',
   // 'songsheets/89 Let All on Earth Their Voices Raise.png',
   // 'songsheets/90 Eternal God, Whose Power Upholds.png',
   // 'songsheets/91 Ye Watchers and Ye Holy Ones.png',
-  // 'songsheets/92 This Is My Father\'s World.png',
-  // 'songsheets/93 All Things Bright and Beautiful.png',
+  'songsheets/92 This Is My Father\'s World.png',
+  'songsheets/93 All Things Bright and Beautiful.png',
   // 'songsheets/94 Nature With Open Volume Stands.png',
   // 'songsheets/95 Spring Has Now Unwrapped the Flowers.png',
   // 'songsheets/96 The Spacious Firmament.png',
   // 'songsheets/97 Lord of the Boundless Curves of Space.png',
   // 'songsheets/98 Can You Count the Stars.png',
   // 'songsheets/99 God Will Take Care of You.png',
-  // 'songsheets/100 Great Is Thy Faithfulness.png',
+  'songsheets/100 Great Is Thy Faithfulness.png',
   // 'songsheets/101 Children of the Heavenly Father.png',
   // 'songsheets/102 Unto the Hills.png',
   // 'songsheets/103 O God, Our Help.png',
@@ -141,7 +141,7 @@ const CACHE_FILES = [
   // 'songsheets/108 Amazing Grace.png',
   // 'songsheets/109 Marvelous Grace.png',
   // 'songsheets/110 God\'s Free Mercy Streameth.png',
-  // 'songsheets/111 It Took a Miracle.png',
+  'songsheets/111 It Took a Miracle.png',
   // 'songsheets/112 Let Us With a Gladsome Mind.png',
   // 'songsheets/113 As Pants the Hart.png',
   // 'songsheets/114 There\'s a Wideness.png',
@@ -528,7 +528,7 @@ const CACHE_FILES = [
   // 'songsheets/484 I Need Thee, Precious Jesus.png',
   // 'songsheets/485 I Must Tell Jesus.png',
   // 'songsheets/486 I Do Believe.png',
-  // 'songsheets/487 In the Garden.png',
+  'songsheets/487 In the Garden.png',
   // 'songsheets/488 At First I Prayed for Light.png',
   // 'songsheets/489 Jesus, Lover of My Soul.png',
   // 'songsheets/490 Jesus, Lover of My Soul (Dykes).png',
@@ -540,7 +540,7 @@ const CACHE_FILES = [
   // 'songsheets/496 Eternal Love, We Have No Good.png',
   // 'songsheets/497 O Gracious Father of Mankind.png',
   // 'songsheets/498 Still, Still With Thee.png',
-  // 'songsheets/499 What a Friend We Have in Jesus.png',
+  'songsheets/499 What a Friend We Have in Jesus.png',
   // 'songsheets/500 Take Time to Be Holy.png',
   // 'songsheets/501 \'Tis the Blessed Hour of Prayer.png',
   // 'songsheets/502 Sun of My Soul.png',
@@ -758,12 +758,12 @@ const CACHE_FILES = [
   // 'songsheets/Brighten the Corner Where You Are.png',
   // 'songsheets/Cares Chorus.png',
   // 'songsheets/Count Your Blessings.png',
-  // 'songsheets/For God So Loved the World.png',
+  'songsheets/For God So Loved the World.png',
   // 'songsheets/From Greenland\'s Icy Mountains.png',
   // 'songsheets/Give Thanks.png',
   // 'songsheets/God\'s Way Is the Best Way.png',
   // 'songsheets/He Looked Beyond My Fault.png',
-  // 'songsheets/His Eye Is On the Sparrow.png',
+  'songsheets/His Eye Is On the Sparrow.png',
   // 'songsheets/I Am So Glad That Our Father.png',
   // 'songsheets/Will There Be Any Stars In My Crown.png',
   // 'songsheets/Just a Closer Walk with Thee.png',
@@ -808,8 +808,8 @@ const CACHE_FILES = [
   // 'audios/4 Praise, My Soul, the King of Heaven.mp3',
   // 'audios/5 All My Hope on God Is Founded.mp3',
   'audios/6 O Worship the Lord.mp3',
-  // 'audios/7 The Lord in Zion Reigneth.mp3',
-  // 'audios/8 We Gather Together.mp3',
+  'audios/7 The Lord in Zion Reigneth.mp3',
+  'audios/8 We Gather Together.mp3',
   // 'audios/10 Come, Christians, Join to Sing.mp3',
   // 'audios/11 The God of Abraham Praise.mp3',
   'audios/12 Joyful, Joyful, We Adore Thee.mp3',
@@ -870,11 +870,11 @@ const CACHE_FILES = [
   // 'audios/77 O Love of God Most Full.mp3',
   // 'audios/78 For God So Loved Us.mp3',
   // 'audios/79 O Love of God, How Strong and True!.mp3',
-  // 'audios/82 Before Jehovah\'s Awful Throne.mp3',
+  'audios/82 Before Jehovah\'s Awful Throne.mp3',
   // 'audios/83 O Worship the King.mp3',
   // 'audios/84 God the Omnipotent.mp3',
   // 'audios/85 Eternal Father, Strong to Save.mp3',
-  // 'audios/86 How Great Thou Art.mp3',
+  'audios/86 How Great Thou Art.mp3',
   // 'audios/87 God Who Spoke in the Beginning.mp3',
   // 'audios/88 I Sing the Mighty Power of God.mp3',
   // 'audios/89 Let All on Earth Their Voices Raise.mp3',
@@ -887,7 +887,7 @@ const CACHE_FILES = [
   // 'audios/96 The Spacious Firmament.mp3',
   // 'audios/98 Can You Count the Stars.mp3',
   // 'audios/99 God Will Take Care of You.mp3',
-  // 'audios/100 Great Is Thy Faithfulness.mp3',
+  'audios/100 Great Is Thy Faithfulness.mp3',
   // 'audios/101 Children of the Heavenly Father.mp3',
   // 'audios/103 O God, Our Help.mp3',
   // 'audios/106 Give to Our God Immortal Praise.mp3',
@@ -901,25 +901,6 @@ const CACHE_FILES = [
   
 
 // Install the Service Worker
-/*
-// original
-self.addEventListener("install", (event) => {
-  // Tell the browser not to finish the install until this promise resolves
-  event.waitUntil((async () => {
-    try {
-      const cache = await caches.open(CACHE_NAME);
-      // this might still load files from the browser's cache instead of from server
-      await cache.addAll(CACHE_FILES);
-      
-      // if don't want to use the new SW immediately then don't do the skipWaiting here but in the addEventListener('message'
-      // self.skipWaiting(); // forces the waiting service worker (i.e. with the new updates) to become the active one immediately
-    } catch (error) {
-      console.error("Service Worker installation failed:", error);
-    }
-  })());
-});
-*/
-
 self.addEventListener("install", (event) => {
   console.log("SW: Install started");
   event.waitUntil((async () => {
@@ -1084,10 +1065,10 @@ self.addEventListener("fetch", (event) => {
         // 4. Handle Partial Content (206) for Audio Stream (url has mp3)
         if (fetchResponse.status === 206 && event.request.url.match(/\.(mp3|wav|m4a)$/i)) {
           const cleanUrl = event.request.url.split('?')[0]; // Strip timestamps for saving
+          // fetch the full audio file
           return fetch(cleanUrl).then(fullResponse => {
             if (fullResponse.ok) {
-              const copy = fullResponse.clone();
-              cache.put(cleanUrl, copy); // Save the full version
+              cache.put(cleanUrl, fullResponse.clone()); // Save the full version
               return fullResponse;      // Play the full version
             }
             return fetchResponse; // Fallback to original if full fetch fails
