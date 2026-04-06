@@ -12,27 +12,26 @@ let currentBookmarkFolder = "Folder 1";
 //////////////////////////////////////////////////////////////////////////////////
 // Start of program. This is called when program loads
 window.addEventListener('load', async () => {
-//(async () => {
   const savedList = localStorage.getItem(APP_NAME+"_currentListPages");
   const savedIndex = localStorage.getItem(APP_NAME+"_swiperindex");
 
 //  if (!savedList || !savedIndex) {
   if (true) {
-      // --- FIRST TIME RUN ---
-      console.log("First time run! Defaulting to index 0.");
-      syncSwiper();
-      swiper.slideTo(0, 0);
-      //localStorage.setItem(APP_NAME+"_swiperindex", 0);
-      //localStorage.setItem(APP_NAME+"_currentListPages", JSON.stringify(currentListPages));        
+    // --- FIRST TIME RUN ---
+    console.log("First time run! Defaulting to index 0.");
+    syncSwiper();
+    swiper.slideTo(0, 0);
+    //localStorage.setItem(APP_NAME+"_swiperindex", 0);
+    //localStorage.setItem(APP_NAME+"_currentListPages", JSON.stringify(currentListPages));        
   } else {
-      // --- SUBSEQUENT RUNS (Restore State) ---
-      console.log("Restoring previous state...");
-      currentListPages = JSON.parse(savedList);
-      
-      syncSwiper();
-      
-      // Jump to the saved song
-      swiper.slideTo(parseInt(savedIndex), 0);
+    // --- SUBSEQUENT RUNS (Restore State) ---
+    console.log("Restoring previous state...");
+    currentListPages = JSON.parse(savedList);
+    
+    syncSwiper();
+    
+    // Jump to the saved song
+    swiper.slideTo(parseInt(savedIndex), 0);
   }
   
   // Request wake lock to prevent screen timeout
@@ -139,7 +138,6 @@ let swiper = new Swiper(".swiper", {
 });
 */
 
-
 let swiper = new Swiper(".swiper", {
     zoom: {
         maxRatio: 5,
@@ -207,7 +205,6 @@ let swiper = new Swiper(".swiper", {
 });
 
 
-
 // load and update the swiper
 function syncSwiper() {
   swiper.virtual.removeAllSlides();
@@ -218,7 +215,6 @@ function syncSwiper() {
 }
 
 //syncSwiper();
-
 
 // After adding the slides, you MUST do a swiper update
 // The Swiper MUST be created here AFTER adding the slides
@@ -476,6 +472,7 @@ function displaySong(songname, pageIndex) {
 */
 
 function displaySong(songname, pageIndex) {
+  // do the following only if not given the pageIndex from attachListItemEventHandler and renderSearchList
   if (pageIndex == -1) {
     let targetFilename = formatName(songname);
 
@@ -505,7 +502,7 @@ function displaySong(songname, pageIndex) {
 
   }
 
-  if (pageIndex !== -1) {
+  if (pageIndex !== -1) { // found the song
     syncSwiper();
     swiper.slideTo(pageIndex, 0);
   } else {
@@ -666,8 +663,6 @@ function updateCurrentListPages(songindex, folderItems) {
 
   return pageIndex;
 } // end updateCurrentListPages
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1122,7 +1117,7 @@ function handleFolderLongPress(folderId) {
         localStorage.setItem(APP_NAME+"_bookmarks", JSON.stringify(currentBookmarks)); // save back to localStorage
         createBookmarkList(); 
         toast.classList.remove('show');
-        showToast(`${currentBookmarkFolder} cleared`);
+        //showToast(`${currentBookmarkFolder} cleared`);
       };
 
       document.getElementById('confirmCancelBtn').onclick = () => { // Cancel clear button clicked
@@ -1221,7 +1216,6 @@ function createBookmarkList() {
   });
 }
 
-
 // Prevent browser default popup menu to save/share/open image when long press on drag handle
 bookmarkList.addEventListener('contextmenu', (e) => {
   if (e.target.closest('.drag-handle')) {
@@ -1287,8 +1281,6 @@ function getClientY(e) {
 
 // onSwipeStart
 function onSwipeStart(e, songname) {
-  // if (!e.target.closest('.swipe-item')) return;  // might need this for the single-click to work.
-
   swipeContent = swipeItem?.querySelector('.swipe-content');
   swipeStartX = getClientX(e);
   swipeStartY = getClientY(e);
@@ -1888,7 +1880,7 @@ document.getElementById('undoBtn').addEventListener('click', (e) => {
     lastDeletedItem = null;
   }
 
-  // 4. Hide Toast immediately
+  // 5. Hide Toast immediately
   clearTimeout(toastTimeout);
   document.getElementById('undo-toast').classList.remove('show');
 });
@@ -1943,7 +1935,6 @@ function renderSearchList(songs) {
   if (songs.length === 1) {
     const songname = songs[0];
     closeSearch();
-    // --- SHORT PRESS SEARCH LIST ---
     displaySong(songname, -1); // --- display the song. -1 for songindex means don't use the index
     return;
   }
@@ -2153,7 +2144,6 @@ const elapsedTime = document.getElementById("elapsed");
 const remainingTime = document.getElementById("remaining");
 const audioFilename = document.getElementById("audioFilename");
 
-//let audiofileAvailable = false;
 let playing = false;
 
 // Format time from seconds to MM:SS
@@ -2201,7 +2191,6 @@ function openMusicPlayer() {
     
     // Check if the file exists (after loading data)
     audio.onloadeddata = () => {
-      //audiofileAvailable = true;
       audioFilename.textContent = filename;  // Display the song name
       updateTimeDisplay();  // Show the initial time remaining
       playBtn.disabled = false;
@@ -2266,18 +2255,14 @@ function stopAudio() {
 }
 /*
 audio.addEventListener("loadeddata", () => {
-  audiofileAvailable = true;
 });
 
 audio.addEventListener("loadedmetadata", () => {
-  if (musicPlayerIsOpen && audiofileAvailable) {
-    updateTimeDisplay();
-  }
+  updateTimeDisplay();
 });
 
 audio.addEventListener("error", () => {
   console.warn("Audio file not found or cannot be loaded.");
-  audiofileAvailable = false;
 });
 */
 
@@ -2845,6 +2830,6 @@ setInterval(() => {
       reg.update();  // step 1
     }
   });
-//}, 24 * 60 * 60 * 1000); // every 24 hours
+}, 24 * 60 * 60 * 1000); // every 24 hours
 //}, 1 * 60 * 60 * 1000);  // every 1 hour
-}, 15 * 1000);           // every 15 seconds
+//}, 15 * 1000);           // every 15 seconds
