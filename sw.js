@@ -1,4 +1,4 @@
-var CACHE_NAME = 'SDA-Hymnal-cache-v1';
+var CACHE_NAME = 'SDA-Hymnal-cache-v2';
 
 // include all the files for offline access
 // do not include sw.js
@@ -910,7 +910,6 @@ self.addEventListener("install", (event) => {
       // Manual fetch with 'cache: reload' to bypass HTTP cache
       const cachePromises = CACHE_FILES.map(async (url) => {
         try {
-          // fetch(url, { cache: 'reload' }) forces the browser to go to the server
           const response = await fetch(new Request(url, { cache: 'reload' }));
           if (!response.ok) throw new Error(`Network response was not ok for ${url}`);
           return await cache.put(url, response);
