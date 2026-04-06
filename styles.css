@@ -116,6 +116,7 @@ body {
   white-space: nowrap; /* Prevent text from wrapping weirdly */
 }
 
+
 /*******************************************************************/
 /* Songsheet */
 .songsheet-container {
@@ -142,6 +143,7 @@ body {
   overflow: hidden;
   background: #fff;
 }
+
 .swiper-zoom-container > img {
   width: 100%;
   height: 100%; /* this will align vertically to the top. If it is auto then it will be centered */
@@ -198,13 +200,13 @@ body {
   
 }
 
+
 /*******************************************************************/
 /*  Numeric, Alphabetic, and Search lists */
 #numericList, #alphabeticList {
   position: absolute;
   top: 0;
   left: 0;
-  /* right: 26px;      /* Leaves room for the sidebar */
   right: 30px;      /* Leaves room for the sidebar */
   bottom: 0;        /* Ensures the list stretches to the bottom of the container */
   width: auto;      /* Changed from calc(100% - 30px) for better stability */
@@ -261,6 +263,7 @@ body {
   background-color: #f0f0f0;
 }
 
+
 /*******************************************************************/
 /*  Fast Scroll List Sidebar */
 .fast-scroll-sidebar {
@@ -292,6 +295,7 @@ body {
 	font-weight: bold;
 	cursor: pointer;
 }
+
 .fast-scroll-bubble {
 	position: absolute; /* Relative to .songsheet-container */
   top: 0;
@@ -318,6 +322,7 @@ body {
 	opacity: 1;
 }
 
+
 /*******************************************************************/
 /*  Add Bookmark Popup Window stuff */
 .addBookmarkMenuOverlay {
@@ -331,6 +336,7 @@ body {
   pointer-events: auto;
   user-select: none; /* disable text selection inside popup */
 }
+
 .addBookmarkControls {
   background: white;
   border-radius: 10px;
@@ -344,6 +350,7 @@ body {
   margin: 0 0 10px;
   font-size: 18px;
 }
+
 .addBookmarkControls p {
   margin: 0 0 15px;
   font-size: 14px;
@@ -367,6 +374,7 @@ body {
 .addBookmarkControls button:hover {
   background: #ddd;
 }
+
 
 /*******************************************************************/
 /* Bookmark List Container & Tabs */
@@ -422,6 +430,7 @@ body {
   /* padding-bottom: 40px; Room for bottom of screen */
   box-sizing: border-box;
 }
+
 
 /*******************************************************************/
 /* Bookmark List Swipe-to-delete and Drag-to-move styles */
@@ -531,6 +540,7 @@ body {
   pointer-events: none; /* No interaction until visible */
   transition: opacity 0.3s ease;
 }
+
 /* For Tablets and larger (screens taller than 800px) */
 @media (min-height: 800px) {
 .editMySongsOverlay {
@@ -538,10 +548,12 @@ body {
     padding-top: 10vh; /* Move it up only when there is plenty of room */
   }
 }
+
 .musicPlayerOverlay.show, .importMySongsOverlay.show, .editMySongsOverlay.show {
   opacity: 1;
   pointer-events: auto;
 }
+
 .musicPlayerControls, .importMySongsControls, .editMySongsControls {
   background: white;
   padding: 20px;
@@ -563,20 +575,24 @@ body {
   -ms-user-select: text;
   user-select: text;
 }
+
 .musicPlayerOverlay.show .musicPlayerControls {
   transform: scale(1);
 }
+
 .musicPlayer-buttons {
   display: flex;
   justify-content: space-around;
   margin-top: 15px;
 }
+
 .musicPlayer-buttons button {
   background: none;
   border: none;
   cursor: pointer;
   padding: 5px;
 }
+
 .musicPlayer-buttons svg {
   width: 32px;
   height: 32px;
@@ -584,27 +600,32 @@ body {
   fill: #2563eb; /* main blue */
   transition: fill 0.2s ease;
 }
+
 .musicPlayer-buttons button:hover:not(:disabled) svg {
   fill: #1e40af; /* darker blue on hover */
 }
+
 .musicPlayer-buttons button:disabled svg {
   fill: #bbd7ff; /* very light blue */
   cursor: not-allowed;
 }
+
 .progress-container {
   margin-top: 15px;
 }
+
 .progress-time {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
   margin-top: 4px;
 }
+
 input[type=range] {
   width: 100%;
 }
+
 .audio-filename {
-/*  font-weight: bold; */
   margin-top: 10px;
   text-align: center;
   min-height: 1.2em; /* Reserve space so layout doesn't jump */
