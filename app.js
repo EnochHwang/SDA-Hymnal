@@ -2,7 +2,7 @@
 // SDA-Hymnal Progressive Web App (PWA)
 // Copyright 2026 Enoch Hwang
 
-const APP_NAME = "SDA-Hymnal";
+const APP_NAME = "SDA Hymnal";
 //let currentListName = "numeric";  // currently not used
 let currentListPages = NUMERIC_PAGES; // initial list
 let currentBookmarkFolder = "Folder 1";
@@ -2830,6 +2830,6 @@ setInterval(() => {
       reg.update();  // step 1
     }
   });
-}, 24 * 60 * 60 * 1000); // every 24 hours
-//}, 1 * 60 * 60 * 1000);  // every 1 hour
+//}, 24 * 60 * 60 * 1000); // every 24 hours
+}, 1 * 60 * 60 * 1000);  // every 1 hour
 //}, 15 * 1000);           // every 15 seconds

@@ -1,4 +1,4 @@
-var CACHE_NAME = 'SDA-Hymnal-cache-v2';
+var CACHE_NAME = 'SDA-Hymnal-cache-v1';
 
 // include all the files for offline access
 // do not include sw.js
