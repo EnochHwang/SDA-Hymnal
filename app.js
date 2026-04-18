@@ -397,7 +397,7 @@ function handleMoreAction(action) {
       break;
       
     case 'moreapps':
-      window.open('https://hwang.lasierra.edu/~enoch/Apps', '_blank');
+      window.open('https://enochhwang.github.io/', '_blank');
       break;
       
     case 'settings':
