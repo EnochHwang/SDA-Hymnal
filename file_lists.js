@@ -3706,6 +3706,7 @@ const NUMERIC_PAGES = [
   "529 Under His Wings",
   "530 It Is Well With My Soul",
   "530 It Is Well With My Soul2",
+  "530 It Is Well With My Soul3",
   "531 We\'ll Build on the Rock",
   "532 Day by Day",
   "533 O for a Faith",
@@ -4173,99 +4174,97 @@ const NUMERIC_PAGES = [
 /////////////////////////////////////////////////////////////////////
 // FIRSTLINE_INDEX
 const FIRSTLINE_INDEX = [
-  "A wonderful Savior is Jesus my Lord",	        // 520 He Hideth My Soul
-  "Alas, and did my Savior bleed?",	        // 163 At the Cross
-  "All to Jesus I surrender",	        // 309 I Surrender All
+  "520 A wonderful Savior is Jesus my Lord",	        // 520 He Hideth My Soul
+  "163 Alas, and did my Savior bleed?",	        // 163 At the Cross
+  "309 All to Jesus I surrender",	        // 309 I Surrender All
   "Amazing Grace shall always",	        // He Looked Beyond My Fault
-  "Be not dismayed whate\'er betide",	        // 99 God Will Take Care of You
-  "Be silent, be silent",	        // 479 Tread Softly
-  "Christ has for sin atonement made",	        // 335 What a Wonderful Savior
-  "Come every soul",	        // 279 Only Trust Him
-  "Come let us sing of homeland",	        // 431 Over Yonder
-  "Come we that love the Lord",	        // 422 Marching to Zion
-  "Days are filled with sorrow and care",	        // 476 Burdens Are Lifted at Calvary
+  "99 Be not dismayed whate\'er betide",	        // 99 God Will Take Care of You
+  "479 Be silent, be silent",	        // 479 Tread Softly
+  "335 Christ has for sin atonement made",	        // 335 What a Wonderful Savior
+  "279 Come every soul",	        // 279 Only Trust Him
+  "431 Come let us sing of homeland",	        // 431 Over Yonder
+  "422 Come we that love the Lord",	        // 422 Marching to Zion
+  "476 Days are filled with sorrow and care",	        // 476 Burdens Are Lifted at Calvary
   "Do not wait until some deed",	        // Brighten the Corner Where You Are
-  "Dying with Jesus, by death reckoned",	        // 507 Moment by Moment
-  "Each little flower that opens",	        // 93 All Things Bright and Beautiful
-  "Earthly pleasures vainly call me",	        // 311 I Would Be Like Jesus
-  "Encamped along the hills of light",	        // 608 Faith Is the Victory
-  "Far away in the depths of my spirit",	        // 466 Wonderful Peace
-  "God sent His Son",	        // 526 Because He Lives
-  "I am bound for the promised land",	        // 620 On Jordan\'s Stormy Banks
-  "I am Thine O Lord",	        // 306 Draw Me Nearer
+  "507 Dying with Jesus, by death reckoned",	        // 507 Moment by Moment
+  "93 Each little flower that opens",	        // 93 All Things Bright and Beautiful
+  "311 Earthly pleasures vainly call me",	        // 311 I Would Be Like Jesus
+  "608 Encamped along the hills of light",	        // 608 Faith Is the Victory
+  "466 Far away in the depths of my spirit",	        // 466 Wonderful Peace
+  "526 God sent His Son",	        // 526 Because He Lives
+  "620 I am bound for the promised land",	        // 620 On Jordan\'s Stormy Banks
+  "306 I am Thine O Lord",	        // 306 Draw Me Nearer
   "I am thinking today of that beautiful land",	        // Will There Be Any Stars In My Crown
   "I am weak but Thou art strong",	        // Just a Closer Walk with Thee
-  "I come to the garden alone",	        // 487 In the Garden
-  "I have a Friend so precious",	        // 456 My Lord and I
-  "I hear the Savior say",	        // 184 Jesus Paid It All
-  "I know not why God\'s wondrous grace",	        // 511 I Know Whom I Have Believed
-  "I serve a risen Savior",	        // 251 He Lives
+  "487 I come to the garden alone",	        // 487 In the Garden
+  "456 I have a Friend so precious",	        // 456 My Lord and I
+  "184 I hear the Savior say",	        // 184 Jesus Paid It All
+  "511 I know not why God\'s wondrous grace",	        // 511 I Know Whom I Have Believed
+  "251 I serve a risen Savior",	        // 251 He Lives
   "I was sinking deep in sin",	        // Love Lifted Me
-  "I would be, dear Savior, wholly",	        // 308 Wholly Thine
-  "I\'m pressing on the upward way",	        // 625 Higher Ground
+  "308 I would be, dear Savior, wholly",	        // 308 Wholly Thine
+  "625 I\'m pressing on the upward way",	        // 625 Higher Ground
   "I\'m so glad I\'m a part of the family",	        // The Family of God
-  "I\'ve wandered far away from God",	        // 296 Lord, I\'m Coming Home
-  "In the blood from the cross",	        // 302 Deeper Yet
-  "In the morning when I rise",	        // 305 Give Me Jesus
+  "296 I\'ve wandered far away from God",	        // 296 Lord, I\'m Coming Home
+  "302 In the blood from the cross",	        // 302 Deeper Yet
+  "305 In the morning when I rise",	        // 305 Give Me Jesus
   "It only takes a spark",	        // Pass It On
   "Jesus is tenderly calling you home",	        // Jesus Is Calling
-  "Jesus keep me near the cross",	        // 312 Near the Cross
+  "312 Jesus keep me near the cross",	        // 312 Near the Cross
   "Jesus my Lord will love me forever",	        // Now I Belong to Jesus
-  "King of my life, I crown Thee now",	        // 317 Lead Me to Calvary
-  "Let us sing a song that will cheer us",	        // 626 In a Little While We\'re Going Home
-  "Lift up the trumpet",	        // 213 Jesus Is Coming Again
-  "Like the woman at the well",	        // 493 Fill My Cup, Lord
-  "Look upon Jesus, sinless is He",	        // 412 Cover With His Life
-  "Lord Jesus, I long to be",	        // 318 Whiter Than Snow
-  "My Father is omnipotent",	        // 111 It Took a Miracle
-  "My Father is rich in houses and lands",	        // 468 A Child of the King
-  "My heart can sing when I pause",	        // 632 Until Then
-  "Now Dear Lord as we pray",	        // 671 As We Come to You in Prayer
+  "317 King of my life, I crown Thee now",	        // 317 Lead Me to Calvary
+  "626 Let us sing a song that will cheer us",	        // 626 In a Little While We\'re Going Home
+  "213 Lift up the trumpet",	        // 213 Jesus Is Coming Again
+  "493 Like the woman at the well",	        // 493 Fill My Cup, Lord
+  "412 Look upon Jesus, sinless is He",	        // 412 Cover With His Life
+  "318 Lord Jesus, I long to be",	        // 318 Whiter Than Snow
+  "111 My Father is omnipotent",	        // 111 It Took a Miracle
+  "468 My Father is rich in houses and lands",	        // 468 A Child of the King
+  "632 My heart can sing when I pause",	        // 632 Until Then
+  "671 Now Dear Lord as we pray",	        // 671 As We Come to You in Prayer
   "O beautiful for spacious skies",	        // America, the Beautiful
-  "O Lord my God!",	        // 86 How Great Thou Art
-  "O now I see the crimson wave",	        // 332 The Cleansing Wave
-  "O safe to the Rock that is higher",	        // 525 Hiding in Thee
-  "O soul, are you weary and troubled",	        // 290 Turn Your Eyes Upon Jesus
-  "O there\'ll be joy when the work is done",	        // 430 Joy By and By
+  "86 O Lord my God!",	        // 86 How Great Thou Art
+  "332 O now I see the crimson wave",	        // 332 The Cleansing Wave
+  "525 O safe to the Rock that is higher",	        // 525 Hiding in Thee
+  "290 O soul, are you weary and troubled",	        // 290 Turn Your Eyes Upon Jesus
+  "430 O there\'ll be joy when the work is done",	        // 430 Joy By and By
   "Of Jesus\' love that sought me",	        // Sweeter As The Years Go By
-  "On a hill far away",	        // 159 The Old Rugged Cross
-  "Once our blessed Christ of beauty",	        // 178 The Unveiled Christ
+  "159 On a hill far away",	        // 159 The Old Rugged Cross
+  "178 Once our blessed Christ of beauty",	        // 178 The Unveiled Christ
   "Saving grace sweet favor from the Lord",	        // Proclaim His Grace
-  "Sing the wondrous love of Jesus",	        // 633 When We All Get to Heaven
-  "Sing them over again to me",	        // 286 Wonderful Words of Life
+  "633 Sing the wondrous love of Jesus",	        // 633 When We All Get to Heaven
+  "286 Sing them over again to me",	        // 286 Wonderful Words of Life
   "Some day the silver cord will break",	        // Saved by Grace
-  "Sometimes I hear strange music",	        // 472 A Song of Heaven and Homeland
-  "Sowing in the morning",	        // 369 Bringing in the Sheaves
-  "Sweet promise is given to all",	        // 600 Hold Fast Till I Come
-  "Teach me Father what to say",	        // 492 Like Jesus
-  "Tell it to every kindred and nation",	        // 202 Hail Him the King of Glory
-  "The golden morning",	        // 205 Gleams of the Golden Morning
-  "The Lord\'s our rock, in Him we hide",	        // 528 A Shelter in the Time of Storm
-  "There is a balm in Gilead",	        // 475 Balm in Gilead
-  "There is a land of pure delight",	        // 449 Never Part Again
-  "There is a name I love to hear",	        // 248 O, How I Love Jesus
-  "There is a place of quiet rest",	        // 495 Near to the Heart of God
-  "There is a quiet place",	        // 503 A Quiet Place
-  "There shall be showers of blessing",	        // 195 Showers of Blessing
-  "There\'s a land that is fairer than day",	        // 428 Sweet By and By
-  "There\'s a star in the east",	        // 138 Rise Up, Shepherd, and Follow
-  "There\'s a sweet, sweet spirit",	        // 262 Sweet, Sweet Spirit
-  "There\'s the wonder of sunset",	        // 75 The Wonder of It All
-  "We are climbing Jacob\'s ladder",	        // 627 Jacob\'s Ladder
-  "We have heard a joyful sound",	        // 340 Jesus Saves
-  "What a fellowship, what a joy divine",	        // 469 Leaning on the Everlasting Arms
-  "What wondrous love is this",	        // 162 Wondrous Love
-  "When all my labors and trials are o\'er",	        // 435 The Glory Song
-  "When peace, like a river, attendeth",	        // 530 It Is Well With My Soul
-  "When peace, like a river, attendeth2",	        // 530 It Is Well With My Soul2
-  "When peace, like a river, attendeth3",	        // 530 It Is Well With My Soul3
-  "When the trumpet of the Lord shall sound",	        // 216 When the Roll Is Called Up Yonder
+  "472 Sometimes I hear strange music",	        // 472 A Song of Heaven and Homeland
+  "369 Sowing in the morning",	        // 369 Bringing in the Sheaves
+  "600 Sweet promise is given to all",	        // 600 Hold Fast Till I Come
+  "492 Teach me Father what to say",	        // 492 Like Jesus
+  "202 Tell it to every kindred and nation",	        // 202 Hail Him the King of Glory
+  "205 The golden morning",	        // 205 Gleams of the Golden Morning
+  "528 The Lord\'s our rock, in Him we hide",	        // 528 A Shelter in the Time of Storm
+  "475 There is a balm in Gilead",	        // 475 Balm in Gilead
+  "449 There is a land of pure delight",	        // 449 Never Part Again
+  "248 There is a name I love to hear",	        // 248 O, How I Love Jesus
+  "495 There is a place of quiet rest",	        // 495 Near to the Heart of God
+  "503 There is a quiet place",	        // 503 A Quiet Place
+  "195 There shall be showers of blessing",	        // 195 Showers of Blessing
+  "428 There\'s a land that is fairer than day",	        // 428 Sweet By and By
+  "138 There\'s a star in the east",	        // 138 Rise Up, Shepherd, and Follow
+  "262 There\'s a sweet, sweet spirit",	        // 262 Sweet, Sweet Spirit
+  "75 There\'s the wonder of sunset",	        // 75 The Wonder of It All
+  "627 We are climbing Jacob\'s ladder",	        // 627 Jacob\'s Ladder
+  "340 We have heard a joyful sound",	        // 340 Jesus Saves
+  "469 What a fellowship, what a joy divine",	        // 469 Leaning on the Everlasting Arms
+  "162 What wondrous love is this",	        // 162 Wondrous Love
+  "435 When all my labors and trials are o\'er",	        // 435 The Glory Song
+  "530 When peace, like a river, attendeth",	        // 530 It Is Well With My Soul
+  "216 When the trumpet of the Lord shall sound",	        // 216 When the Roll Is Called Up Yonder
   "When upon life\'s billows",	        // Count Your Blessings
-  "When we walk with the Lord",	        // 590 Trust and Obey
-  "While shepherds kept their watching",	        // 121 Go, Tell It on the Mountain
-  "Who can cheer the heart like Jesus",	        // 189 All That Thrills My Soul
+  "590 When we walk with the Lord",	        // 590 Trust and Obey
+  "121 While shepherds kept their watching",	        // 121 Go, Tell It on the Mountain
+  "189 Who can cheer the heart like Jesus",	        // 189 All That Thrills My Soul
   "Why should I feel discouraged",	        // His Eye Is On the Sparrow
-  "Would you be free"	        // 294 Power in the Blood
+  "294 Would you be free"	        // 294 Power in the Blood
 ];
 // end FIRSTLINE_INDEX
 
@@ -4367,3 +4366,14 @@ const FIRSTLINE_PAGES = [
   "294 Power in the Blood"			// Would you be free
 ];
 // end FIRSTLINE_PAGES
+
+
+/////////////////////////////////////////////////////////////////////
+// HELP_PAGES
+const HELP_PAGES = [
+  "help",
+  "help2",
+  "help3",
+  "help4"
+];
+// end HELP_PAGES
