@@ -418,12 +418,6 @@ function handleMoreAction(action) {
       currentListPages = HELP_PAGES;
       syncSwiper();
       swiper.slideTo(0, 0);
-
-      // swiper.virtual.removeAllSlides();
-      // swiper.virtual.slides = NUMERIC_PAGES;  // populate swiper with NUMERIC_PAGES (default)  
-      // currentListPages = NUMERIC_PAGES;
-      // swiper.virtual.update();    
-      // swiper.slideTo(0, 0); // jump to About page
       break;
   }
 }
@@ -513,6 +507,7 @@ function displaySong(songname, pageIndex) {
   } else {
     console.warn("Could not find page for: ", songname);
   }
+  
 }
 
 
@@ -1035,9 +1030,9 @@ addBookmarkMenuOverlay.addEventListener("click", (e) => {
   }
   
   // clicking outside popup also closes
-  //if (e.target === addBookmarkMenuOverlay) {
-  //  addBookmarkMenuOverlay.style.display = "none";
-  //}
+  if (e.target === addBookmarkMenuOverlay) {
+    addBookmarkMenuOverlay.style.display = "none";
+  }
 });
     
 
@@ -2329,7 +2324,9 @@ function goImportMySongs() {
   const fileInput = document.getElementById('hiddenFileInput');
   const importSource = document.querySelector('input[name="importSource"]:checked').value;
 
-  if (importSource === 'file') {
+  // close the Input My Songs popup here????
+  
+  if (importSource === 'file') {  // user selected file or camera?
     // open the file picker
     fileInput.removeAttribute('capture');
     fileInput.setAttribute('accept', '.jpg, .jpeg, .png'); // Set your allowed types
@@ -2748,11 +2745,7 @@ const requestWakeLock = async () => {
       // Request a screen wake lock
       wakeLock = await navigator.wakeLock.request('screen');
       
-      // Set the timer for 30 minutes (30 * 60 * 1000 milliseconds)
-      clearTimeout(wakeLockTimer); // Clear any existing timer first
-      wakeLockTimer = setTimeout(() => {
-        releaseWakeLock();
-      }, 1800000);
+//      resetWakeLockTimer(); // reset screen timeout timer
       
       // Listen for the release event
       wakeLock.addEventListener('release', () => {
@@ -2767,15 +2760,18 @@ const requestWakeLock = async () => {
   }
 };
 
-const releaseWakeLock = () => {
-  if (wakeLock !== null) {
-    wakeLock.release();
-    wakeLock = null;
-  }
-  if (wakeLockTimer !== null) {
-    clearTimeout(wakeLockTimer);
-    wakeLockTimer = null;
-  }
+// Set the timer for 30 minutes (30 * 60 * 1000 milliseconds)
+const resetWakeLockTimer = () => {
+  console.log('Reset Wake Lock timer');
+  clearTimeout(wakeLockTimer);
+  wakeLockTimer = setTimeout(() => {
+    if (wakeLock) { // release the screen timeout lock
+      wakeLock.release();
+      wakeLock = null;
+      clearTimeout(wakeLockTimer);
+      wakeLockTimer = null;      
+    }
+  }, 1800000);  // 30 minutes
 };
 
 
