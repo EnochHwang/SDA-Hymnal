@@ -96,89 +96,89 @@ window.addEventListener('offline', () => {
 //////////////////////////////////////////////////////////////////////////////////
 // Initialize Swiper
 let swiper = new Swiper(".swiper", {
-    zoom: {
-      maxRatio: 5,
-      minRatio: 1,
-      toggle: false // disable Double-Tap Zoom (Crucial for Long Press)
-    },
-    grabCursor: true,
-    
-    // --- fine-tune for ultra-responsive swiping ---
-    speed: 300,            // Faster slide transition animation (was 500)
-    touchRatio: 1.5,       // Multiplies physics so the slide moves further than your finger
-    threshold: 3,          // Instantly triggers swipe after just 3px of movement
-    longSwipesRatio: 0.1,  // Requires only a tiny 10% distance drag to commit to a page turn
-    
-    // create the slides
-    virtual: {
-      renderSlide: function (title, index) {
-        //<div> format
-        //<div class="swiper-slide">
-        //  <div class="swiper-zoom-container">
-        //    <img src="songsheets/1 Praise to the Lord.png">
-        //  </div>
-        //</div>
-        
-        const swiper_slide = document.createElement('div');
-        swiper_slide.className = 'swiper-slide';
-        const swiper_zoom = document.createElement('div');
-        swiper_zoom.className = 'swiper-zoom-container';
-        const img = document.createElement('img');
-        
-        // check for MySongs in local storage first
-        const mySongs = JSON.parse(localStorage.getItem(APP_NAME+"_MySongs") || '{}');
-        if (mySongs[title]) {
-          // It's a My Song! Use the Base64 data from local storage
-          img.src = mySongs[title];
-          
-        } else {  // it's a regular song in songsheet. Fetch it from cache or network
-          img.src = `songsheets/${title}.png`;
-        }
-
-        img.alt = title;
-        img.dataset.title = title;  // Store the title here so the Wrapper can find it later
-        swiper_zoom.appendChild(img);
-        swiper_slide.appendChild(swiper_zoom);
-        return swiper_slide;
-      }
-    },
+  zoom: {
+    maxRatio: 5,
+    minRatio: 1,
+    toggle: false // disable Double-Tap Zoom (Crucial for Long Press)
+  },
+  grabCursor: true,
   
-    on: {
-      // this on block is to re-fetch the broken img links when back online
-      slideChange: function() {
-        // We use a tiny timeout to ensure the DOM has updated the 'active' class
-        setTimeout(() => {
-          const activeSlide = this.el.querySelector('.swiper-slide-active');
-          if (activeSlide) {
-            const img = activeSlide.querySelector('img');
-            // check if it's a broken songsheet. It's broken if img.naturalWidth === 0
-            if (img && img.src.includes('songsheets/') && img.naturalWidth === 0) {
-              const title = img.dataset.title;
-              console.log(`swiper:Refetching: ${title}`);
-              // The '?refetch=' + Date.now() part clears the browser's memory and do a refetch
-              img.src = `songsheets/${title}.png?refetch=` + Date.now();
-
-            }
-          }
-        }, 50); // 50ms is unnoticeable but enough for Swiper to sync
-      },
+  // --- fine-tune for ultra-responsive swiping ---
+  speed: 300,            // Faster slide transition animation (was 500)
+  touchRatio: 1.5,       // Multiplies physics so the slide moves further than your finger
+  threshold: 3,          // Instantly triggers swipe after just 3px of movement
+  longSwipesRatio: 0.1,  // Requires only a tiny 10% distance drag to commit to a page turn
+  
+  // create the slides
+  virtual: {
+    renderSlide: function (title, index) {
+      //<div> format
+      //<div class="swiper-slide">
+      //  <div class="swiper-zoom-container">
+      //    <img src="songsheets/1 Praise to the Lord.png">
+      //  </div>
+      //</div>
       
-      // --- SHORT PRESS PAGE TURN ---
-      click: function(e) {
-        // Swiper automatically filters out active horizontal swipes here.
-        // It catches quick taps, even if the finger drifted vertically.
-        if (swiper.zoom && swiper.zoom.scale > 1) return; // Skip if zoomed in
-
-        // If the finger lift followed a long press, clear the flag and do nothing
-        if (isLongPressAction) {
-          isLongPressAction = false;
-          return;
-        } else {  // swipe to next page
-          swiper.slideNext(); 
-        }
-      }
+      const swiper_slide = document.createElement('div');
+      swiper_slide.className = 'swiper-slide';
+      const swiper_zoom = document.createElement('div');
+      swiper_zoom.className = 'swiper-zoom-container';
+      const img = document.createElement('img');
+      
+      // check for MySongs in local storage first
+      const mySongs = JSON.parse(localStorage.getItem(APP_NAME+"_MySongs") || '{}');
+      if (mySongs[title]) {
+        // It's a My Song! Use the Base64 data from local storage
+        img.src = mySongs[title];
         
-    } // end on
+      } else {  // it's a regular song in songsheet. Fetch it from cache or network
+        img.src = `songsheets/${title}.png`;
+      }
+
+      img.alt = title;
+      img.dataset.title = title;  // Store the title here so the Wrapper can find it later
+      swiper_zoom.appendChild(img);
+      swiper_slide.appendChild(swiper_zoom);
+      return swiper_slide;
+    }
+  },
+
+  on: {
+    // this on block is to re-fetch the broken img links when back online
+    slideChange: function() {
+      // We use a tiny timeout to ensure the DOM has updated the 'active' class
+      setTimeout(() => {
+        const activeSlide = this.el.querySelector('.swiper-slide-active');
+        if (activeSlide) {
+          const img = activeSlide.querySelector('img');
+          // check if it's a broken songsheet. It's broken if img.naturalWidth === 0
+          if (img && img.src.includes('songsheets/') && img.naturalWidth === 0) {
+            const title = img.dataset.title;
+            console.log(`swiper:Refetching: ${title}`);
+            // The '?refetch=' + Date.now() part clears the browser's memory and do a refetch
+            img.src = `songsheets/${title}.png?refetch=` + Date.now();
+
+          }
+        }
+      }, 50); // 50ms is unnoticeable but enough for Swiper to sync
+    },
+    
+    // --- SHORT PRESS PAGE TURN ---
+    click: function(e) {
+      // Swiper automatically filters out active horizontal swipes here.
+      // It catches quick taps, even if the finger drifted vertically.
+      if (swiper.zoom && swiper.zoom.scale > 1) return; // Skip if zoomed in
+
+      // If the finger lift followed a long press, clear the flag and do nothing
+      if (isLongPressAction) {
+        isLongPressAction = false;
+        return;
+      } else {  // swipe to next page
+        swiper.slideNext(); 
+      }
+    }
+      
+  } // end on
     
 });
 
@@ -928,9 +928,9 @@ swiperWrapper.addEventListener('pointerdown', (e) => {
     const songname = swiper.virtual.slides[index]; // get the page
     if (songname) {
       isLongPressAction = true; // mark that a long press occurred
+      longPressTimer = null;
       addBookmarkMenuOverlay.dataset.songname = songname; // pass songname to the addBookmarkMenuOverlay.addEventListener
       addBookmarkMenuOverlay.style.display = "flex";  // show Add Bookmark Menu popup window
-      longPressTimer = null;
       // execution continues with the addBookmarkMenuOverlay.addEventListener click events
       
     } else {
