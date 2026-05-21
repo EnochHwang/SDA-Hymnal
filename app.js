@@ -19,8 +19,12 @@ window.addEventListener('load', async () => {
   if (true) {
     // --- FIRST TIME RUN ---
     console.log("First time run! Defaulting to index 0.");
-    syncSwiper();
-    swiper.slideTo(0, 0);
+    //syncSwiper();  // doing this is too much
+    // initial load the swiper
+    //swiper.virtual.slides = currentListPages;
+    //if (swiper.virtual.cache) swiper.virtual.cache = {};
+    //swiper.slideTo(0, 0);
+
     //localStorage.setItem(APP_NAME+"_swiperindex", 0);
     //localStorage.setItem(APP_NAME+"_currentListPages", JSON.stringify(currentListPages));        
   } else {
@@ -91,61 +95,21 @@ window.addEventListener('offline', () => {
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 // Initialize Swiper
-/*
-// oringinal
 let swiper = new Swiper(".swiper", {
     zoom: {
-        maxRatio: 5,
-        minRatio: 1,
-        toggle: false // DISABLE Double-Tap Zoom (Crucial for Long Press)
+      maxRatio: 5,
+      minRatio: 1,
+      toggle: false // disable Double-Tap Zoom (Crucial for Long Press)
     },
     grabCursor: true,
-    speed: 500,
-    virtual: {
-      renderSlide: function (title, index) {
-        //<div> format
-        //<div class="swiper-slide">
-        //  <div class="swiper-zoom-container">
-        //    <img src="songsheets/1 Praise to the Lord.png">
-        //  </div>
-        //</div>
-        
-        const swiper_slide = document.createElement('div');
-        swiper_slide.className = 'swiper-slide';
-        const swiper_zoom = document.createElement('div');
-        swiper_zoom.className = 'swiper-zoom-container';
-        const img = document.createElement('img');
-        
-        // check for MySongs in local storage first
-        const mySongs = JSON.parse(localStorage.getItem(APP_NAME+"_MySongs") || '{}');
-        if (mySongs[title]) {
-          // It's a My Song! Use the Base64 data from local storage
-          img.src = mySongs[title];
-          
-        } else {  // it's a regular song in songsheet. Fetch it from cache or network
-          console.log("swiper loading ",title);
-          img.src = `songsheets/${title}.png`;
-        
-        }
-
-        img.alt = title;
-        img.dataset.title = title;  // IMPORTANT: Store the title here so the Wrapper can find it later
-        swiper_zoom.appendChild(img);
-        swiper_slide.appendChild(swiper_zoom);
-        return swiper_slide;
-    }
-  }
-});
-*/
-
-let swiper = new Swiper(".swiper", {
-    zoom: {
-        maxRatio: 5,
-        minRatio: 1,
-        toggle: false // disable Double-Tap Zoom (Crucial for Long Press)
-    },
-    grabCursor: true,
-    speed: 500,
+    
+    // --- fine-tune for ultra-responsive swiping ---
+    speed: 300,            // Faster slide transition animation (was 500)
+    touchRatio: 1.5,       // Multiplies physics so the slide moves further than your finger
+    threshold: 3,          // Instantly triggers swipe after just 3px of movement
+    longSwipesRatio: 0.1,  // Requires only a tiny 10% distance drag to commit to a page turn
+    
+    // create the slides
     virtual: {
       renderSlide: function (title, index) {
         //<div> format
@@ -179,9 +143,8 @@ let swiper = new Swiper(".swiper", {
       }
     },
   
-    // this on block is to re-fetch the broken img links when back online
     on: {
-      // Trigger as soon as the swipe starts
+      // this on block is to re-fetch the broken img links when back online
       slideChange: function() {
         // We use a tiny timeout to ensure the DOM has updated the 'active' class
         setTimeout(() => {
@@ -198,6 +161,21 @@ let swiper = new Swiper(".swiper", {
             }
           }
         }, 50); // 50ms is unnoticeable but enough for Swiper to sync
+      },
+      
+      // --- SHORT PRESS PAGE TURN ---
+      click: function(e) {
+        // Swiper automatically filters out active horizontal swipes here.
+        // It catches quick taps, even if the finger drifted vertically.
+        if (swiper.zoom && swiper.zoom.scale > 1) return; // Skip if zoomed in
+
+        // If the finger lift followed a long press, clear the flag and do nothing
+        if (isLongPressAction) {
+          isLongPressAction = false;
+          return;
+        } else {  // swipe to next page
+          swiper.slideNext(); 
+        }
       }
         
     } // end on
@@ -214,7 +192,7 @@ function syncSwiper() {
   swiper.update();          // Update the Swiper Layout
 }
 
-//syncSwiper();
+syncSwiper(); // do it here instead of at window.addEventListener('load', async () => {
 
 // After adding the slides, you MUST do a swiper update
 // The Swiper MUST be created here AFTER adding the slides
@@ -884,8 +862,10 @@ function createFastScroll(sidebarId, listId, dataAttribute, itemsArray) {
 const swiperWrapper = document.querySelector('.swiper-wrapper');
 const addBookmarkMenuOverlay = document.getElementById('addBookmarkMenuOverlay');
 let longPressTimer = null;
+let isLongPressAction = false; // Flag to track if the touch was a long press
 let startX = 0;
 let startY = 0;
+/*
 
 // Handle longpress on songsheet to show add bookmark popup window
 swiperWrapper.addEventListener('pointerdown', (e) => {
@@ -925,43 +905,92 @@ swiperWrapper.addEventListener('pointerdown', (e) => {
     }
   }, 700); // longpress hold time
 });
+*/
 
-// Prevent Default Context Menu
-swiperWrapper.addEventListener('contextmenu', (e) => {
-  e.preventDefault();
-  return false;
+// Handle longpress on songsheet to show add bookmark popup window
+swiperWrapper.addEventListener('pointerdown', (e) => {
+  if (!e.isPrimary) return; // Ignore multi-touch
+  if (swiper.zoom && swiper.zoom.scale > 1) return; // Ignore when zoomed
+
+  if (e.target.tagName === 'IMG') {
+    e.preventDefault();
+  }
+
+  addBookmarkMenuOverlay.style.display = 'none'; // Hide if already open
+  startX = e.clientX;
+  startY = e.clientY;
+  isLongPressAction = false; // Reset flag on every fresh touch down
+  
+  // Start the timer for a long press hold
+  longPressTimer = setTimeout(() => {    
+    // --- LONG PRESS SONG SHEET ---
+    const index = swiper.activeIndex; // get the current active song index
+    const songname = swiper.virtual.slides[index]; // get the page
+    if (songname) {
+      isLongPressAction = true; // mark that a long press occurred
+      addBookmarkMenuOverlay.dataset.songname = songname; // pass songname to the addBookmarkMenuOverlay.addEventListener
+      addBookmarkMenuOverlay.style.display = "flex";  // show Add Bookmark Menu popup window
+      longPressTimer = null;
+      // execution continues with the addBookmarkMenuOverlay.addEventListener click events
+      
+    } else {
+      // should never get here
+      console.error("Could not find song title at index:", index, songname);
+    }
+  }, 700); // Hold duration required to activate popup
 });
 
 
 // Touch Move (Cancel if swiping) for desktop
 swiperWrapper.addEventListener('pointermove', (e) => {
   if (longPressTimer) {
-    // If finger moves more than 10px, it's a swipe/pan, not a hold
-    if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) {
+    if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
       clearTimeout(longPressTimer);
       longPressTimer = null;
+    }
+    // turn to next page even with a slight vertical drift/swipe
+    if (Math.abs(e.clientY - startY) > 5) {
+      swiper.slideNext();
     }
   }
 });
 
 // Touch Move (Cancel if swiping) for tablet
-//// TODO Warning here: app.js:575 [Violation] Added non-passive event listener to a scroll-blocking 'touchmove' event. Consider marking event handler as 'passive' to make the page more responsive.
 swiperWrapper.addEventListener('touchmove', (e) => {
   if (longPressTimer) {
-    // If finger moves more than 10px, it's a swipe/pan, not a hold
-    if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) {
+    if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
       clearTimeout(longPressTimer);
       longPressTimer = null;
     }
+    // turn to next page even with a slight vertical drift/swipe
+    if (Math.abs(e.clientY - startY) > 5) {
+      swiper.slideNext();
+    }
   }
-}, {passive: false}); // this removed the warning but haven't tested for other side effects
+});
 
-// Touch End (Cancel)
-swiperWrapper.addEventListener('pointerup', () => {
+// Touch End (Cancel) / Pointer Up - Handles short tap zone transitions
+swiperWrapper.addEventListener('pointerup', (e) => {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;    
+    // Note: Short tap action is intentionally bypassed here because 
+    // Swiper's native 'click' callback handler catches it cleanly instead.
+  }
+});
+
+// Global catch-all safety window tracker to kill hanging timers if pointer leaves context
+window.addEventListener('pointercancel', () => {
   if (longPressTimer) {
     clearTimeout(longPressTimer);
     longPressTimer = null;
   }
+});
+
+// Prevent Default Context Menu
+swiperWrapper.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  return false;
 });
 
 // Prevent longpress popup when vertical scroll in landscape mode
@@ -1928,7 +1957,7 @@ function renderSearchList(songs) {
   adjustSearchListHeight(); // Adjust list height whenever results change
 
   if (songs.length === 0) {
-    searchList.innerHTML = '<div style="padding:20px; color:#888; text-align:center;">No matching songs found</div>'; // No matching songs found
+    searchList.innerHTML = '<div style="padding:20px; color:#888; text-align:center;">未找到匹配的歌曲</div>'; // No matching songs found
     return;
   }
   // only one matching song so display it
