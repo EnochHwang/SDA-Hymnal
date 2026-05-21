@@ -1,4 +1,4 @@
-var CACHE_NAME = 'SDA-Hymnal-cache-v1';
+var CACHE_NAME = 'SDA-Hymnal-cache-v2';
 
 // include all the files for offline access
 // do not include sw.js
@@ -1559,78 +1559,6 @@ self.addEventListener('activate', event => {
 });
 
 // Fetch resources from cache first then from server if not in cache
-/*
-// original
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const url = new URL(event.request.url);
-      //const fileName = decodeURI(url.pathname.split('/').pop()) || 'index.html';  // this is only needed for debugging
-
-      try {
-        //console.log(`%cSW Fetching: ${fileName}`, "color: gray;");
-
-        // 1. Try a Strict Match first
-        let cachedResponse = await cache.match(event.request);
-
-        // 2. If no strict match, try matching by URL String ignoring search params
-        // This is crucial for audio and the ?refetch= logic
-        if (!cachedResponse) {
-          cachedResponse = await cache.match(event.request.url, { 
-            ignoreSearch: true,
-            ignoreVary: true 
-          });
-          if (cachedResponse) {
-             //console.log(`%c[Cache Hit] ${fileName} (via URL String match)`, "color: green; font-weight: bold;");
-          }
-        } else {
-          //console.log(`%c[Cache Hit] ${fileName} (via Request match)`, "color: green; font-weight: bold;");
-        }
-
-        if (cachedResponse) return cachedResponse;
-
-        // 3. Not in cache so do a Network Fetch
-        //console.log(`%c[Network Request] ${fileName}`, "color: orange;");
-        const fetchResponse = await fetch(event.request);
-
-        // 4. Handle Partial Content (Audio Stream)
-        if (fetchResponse.status === 206) {
-          const cleanUrl = event.request.url.split('?')[0]; // Strip timestamps for saving
-          fetch(cleanUrl)
-            .then((fullResponse) => {
-              if (fullResponse.status === 200) {
-                cache.put(cleanUrl, fullResponse); // Save under clean URL
-                //console.log(`%c[Audio Saved] ${fileName}`, "color: blue;");
-              }
-            });
-          return fetchResponse;
-        }
-
-        // 5. Regular files (Status 200)
-        if (fetchResponse.ok) {
-          const cleanUrl = event.request.url.split('?')[0];
-          await cache.put(cleanUrl, fetchResponse.clone());
-          //console.log(`%c[Saved to Cache] ${fileName}`, "color: #28a745;");
-        }
-        
-        return fetchResponse;
-
-      } catch (error) {
-        // If offline and not in cache, fallback
-        //console.log(`%c[Offline Error] ${fileName}`, "color: red;");
-        if (event.request.mode === 'navigate') {  // Check if the request is for a web page (navigation)
-          const fallback = await cache.match("index.html");
-          return fallback || new Response("Offline", { status: 503 });
-        }
-        // It's an image or audio that failed offline, just return a 404.
-        return new Response(null, { status: 404, statusText: "Offline" });
-      }
-    })()
-  );
-});
-*/
-
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     (async () => {
