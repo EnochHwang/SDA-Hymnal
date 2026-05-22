@@ -224,6 +224,132 @@ swiper.removeAllSlides();
 
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
+// Handle gestures on songsheets for swipes, short press and long press
+// Gestures not handled here will be handled in the swiper on:click function
+const swiperWrapper = document.querySelector('.swiper-wrapper');
+const addBookmarkMenuOverlay = document.getElementById('addBookmarkMenuOverlay');
+let longPressTimer = null;
+let isLongPressAction = false; // Flag to track if the touch was a long press
+let startX = 0;
+let startY = 0;
+
+// Start of touch event
+swiperWrapper.addEventListener('pointerdown', (e) => {
+  if (!e.isPrimary) { // Ignore multi-touch
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+    return;
+  }
+  if (swiper.zoom && swiper.zoom.scale > 1) { // Ignore when zoomed
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+    return;
+  }
+
+  if (e.target.tagName === 'IMG') {
+    e.preventDefault();
+  }
+
+  addBookmarkMenuOverlay.style.display = 'none'; // Hide if already open
+  startX = e.clientX;
+  startY = e.clientY;
+  isLongPressAction = false; // Reset flag on every fresh touch down
+  
+  // Handle longpress on songsheet to show add bookmark popup window
+  // Start the timer for a long press hold
+  longPressTimer = setTimeout(() => {    
+    // --- LONG PRESS SONG SHEET ---
+    const index = swiper.activeIndex; // get the current active song index
+    const songname = swiper.virtual.slides[index]; // get the page
+    if (songname) {
+      isLongPressAction = true; // mark that a long press occurred
+      longPressTimer = null;
+      addBookmarkMenuOverlay.dataset.songname = songname; // pass songname to the addBookmarkMenuOverlay.addEventListener
+      addBookmarkMenuOverlay.style.display = "flex";  // show Add Bookmark Menu popup window
+      // execution continues with the addBookmarkMenuOverlay.addEventListener click events
+      
+    } else {
+      // should never get here
+      console.error("Could not find song title at index:", index, songname);
+    }
+  }, 700); // Hold duration required to activate popup
+});
+
+
+// Touch Move (Cancel if swiping) for desktop
+swiperWrapper.addEventListener('pointermove', (e) => {
+  if (longPressTimer) {
+    if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+    // turn to next page even with a slight vertical drift/swipe
+    if (Math.abs(e.clientY - startY) > 5) {
+      swiper.slideNext();
+    }
+  }
+});
+
+// Touch Move (Cancel if swiping) for tablet
+swiperWrapper.addEventListener('touchmove', (e) => {
+  if (longPressTimer) {
+    if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+    // turn to next page even with a slight vertical drift/swipe
+    if (Math.abs(e.clientY - startY) > 5) {
+      swiper.slideNext();
+    }
+  }
+});
+
+// Touch End (Cancel) / Pointer Up - Handles short tap zone transitions
+swiperWrapper.addEventListener('pointerup', (e) => {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;    
+    // Note: Short tap action is intentionally bypassed here because 
+    // Swiper's native 'click' callback handler catches it cleanly instead.
+  }
+});
+
+// Global catch-all safety window tracker to kill hanging timers if pointer leaves context
+window.addEventListener('pointercancel', () => {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+});
+
+// Prevent Default Context Menu
+swiperWrapper.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  return false;
+});
+
+// Prevent longpress popup when vertical scroll in landscape mode
+const container = document.querySelector('.songsheet-container');
+container.addEventListener('scroll', () => {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+}, { passive: true });
+
+// Go back to no zoom (1x) when device orientation change
+window.addEventListener("orientationchange", () => {
+  // Small delay ensures the browser has finished the rotation animation
+  setTimeout(() => {
+    if (swiper.zoom) {
+      swiper.zoom.out();
+    }
+  }, 200);
+});
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 // Menu bar buttons
 function onMenuPress(id) {
   addBookmarkMenuOverlay.style.display = "none";  // hide the Add Bookmark Menu
@@ -493,77 +619,6 @@ function displaySong(songname, pageIndex) {
 //////////////////////////////////////////////////////////////////////////////////
 ///// Update the global variable currentListPages with all the pages for the songs in folderItems
 // return the swiper index for the given song
-/*
-// original
-function updateCurrentListPages(songindex, folderItems) {
-  const folderListPages = [];
-  let pageIndex = -1;
-
-  folderItems.forEach((item, index) => {
-    // 1. add all the pages for a multi-page song in NUMERIC_PAGES
-    // .filter() returns an array of all matches
-    let songPages = NUMERIC_PAGES.filter(p => p.startsWith(item) && p.slice(item.length).match(/^\d*$/));
-
-    // 2. song is not in NUMERIC_PAGES, see if it is in FIRSTLINE_INDEX
-    if (songPages.length === 0) {
-      const i = FIRSTLINE_INDEX.findIndex(name => name === item || name.startsWith(item));
-      if (i !== -1) {
-        const name = FIRSTLINE_PAGES[i];
-        songPages = NUMERIC_PAGES.filter(p => p.startsWith(name) && p.slice(name.length).match(/^\d*$/));
-      }
-    }
-    
-    // 3. song is not in FIRSTLINE_INDEX, see if it is in My Songs
-    if (songPages.length === 0) {
-      // if creating the list for the My Songs folder than just add that one item
-      if (currentBookmarkFolder === "Folder 4") {
-        songPages = [item];
-        
-      } else {  // otherwise it might be a multipage song so need to add all the pages for the song
-        const mySongs = JSON.parse(localStorage.getItem(APP_NAME + "_MySongs") || '{}');
-        const mySongKeys = Object.keys(mySongs);  // get a list of all the song names from My Songs
-
-        // get all the pages for the song. Search for matches like "SongName", "SongName 1", "SongName 2"
-        songPages = mySongKeys.filter(key => 
-          key === item || (key.startsWith(item) && key.slice(item.length).match(/^\s*\d*$/))
-        );
-
-        // sort numerically (so "Song 10" comes after "Song 2")
-        songPages.sort((a, b) => {
-          const numA = parseInt(a.slice(item.length)) || 0;
-          const numB = parseInt(b.slice(item.length)) || 0;
-          return numA - numB;
-        });
-      }
-
-    }
-
-    // if nothing found then just use the item itself
-    if (songPages.length === 0) {
-      songPages = [item];
-    }
-
-    // remove duplicates e.g. His Eye Is On the Sparrow occurs twice in the NUMERIC_PAGES list
-    songPages = [...new Set(songPages)];
-    
-    // Calculate the index for the swiper to jump to if needed
-    // set the actual pageIndex of the selected page in folderListPages
-    // this is needed if a song occurs more than once in the bookmark list
-    // and the second occurence of the song is selected
-    if (index == songindex) {
-      pageIndex = folderListPages.length;
-    }
-    
-    folderListPages.push(...songPages); // add pages to the list
-  });
-
-  // Update the global currentListPages
-  currentListPages = folderListPages;
-
-  return pageIndex;
-} // end updateCurrentListPages
-*/
-
 function updateCurrentListPages(songindex, folderItems) {
   const folderListPages = [];
   let pageIndex = -1;
@@ -855,171 +910,6 @@ function createFastScroll(sidebarId, listId, dataAttribute, itemsArray) {
   window.addEventListener('touchcancel', stopDragging);
 } // end createFastScroll
 
-
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-// Handle gestures for the swiper songsheet to show the Add Bookmark menu popup window
-const swiperWrapper = document.querySelector('.swiper-wrapper');
-const addBookmarkMenuOverlay = document.getElementById('addBookmarkMenuOverlay');
-let longPressTimer = null;
-let isLongPressAction = false; // Flag to track if the touch was a long press
-let startX = 0;
-let startY = 0;
-/*
-
-// Handle longpress on songsheet to show add bookmark popup window
-swiperWrapper.addEventListener('pointerdown', (e) => {
-  if (!e.isPrimary) {	 // Ignore multi-touch
-    clearTimeout(longPressTimer);
-    longPressTimer = null;
-    return;
-  }
-    if (swiper.zoom && swiper.zoom.scale > 1) { // Ignore when zoomed in
-    clearTimeout(longPressTimer);
-    longPressTimer = null;
-    return;
-  }
-  // Prevent the browser's default "drag image" behavior 
-  // which iPad often confuses with zooming
-  if (e.target.tagName === 'IMG') {
-    e.preventDefault();
-  }
-
-  addBookmarkMenuOverlay.style.display = 'none';	// Hide menu if it's already open
-
-  startX = e.clientX;
-  startY = e.clientY;
-  
-  longPressTimer = setTimeout(() => {
-    // --- LONG PRESS SONG SHEET ---
-    const index = swiper.activeIndex; // get the current active song index
-    const songname = swiper.virtual.slides[index]; // get the page
-    if (songname) {
-      addBookmarkMenuOverlay.dataset.songname = songname; // pass songname to the addBookmarkMenuOverlay.addEventListener
-      addBookmarkMenuOverlay.style.display = "flex";  // show Add Bookmark Menu popup window
-      // execution continues with the addBookmarkMenuOverlay.addEventListener click events
-
-    } else {
-      // should never get here
-      console.error("Could not find song title at index:", index, songname);
-    }
-  }, 700); // longpress hold time
-});
-*/
-
-// Handle longpress on songsheet to show add bookmark popup window
-swiperWrapper.addEventListener('pointerdown', (e) => {
-  if (!e.isPrimary) { // Ignore multi-touch
-    clearTimeout(longPressTimer);
-    longPressTimer = null;
-    return;
-  }
-  if (swiper.zoom && swiper.zoom.scale > 1) { // Ignore when zoomed
-    clearTimeout(longPressTimer);
-    longPressTimer = null;
-    return;
-  }
-
-  if (e.target.tagName === 'IMG') {
-    e.preventDefault();
-  }
-
-  addBookmarkMenuOverlay.style.display = 'none'; // Hide if already open
-  startX = e.clientX;
-  startY = e.clientY;
-  isLongPressAction = false; // Reset flag on every fresh touch down
-  
-  // Start the timer for a long press hold
-  longPressTimer = setTimeout(() => {    
-    // --- LONG PRESS SONG SHEET ---
-    const index = swiper.activeIndex; // get the current active song index
-    const songname = swiper.virtual.slides[index]; // get the page
-    if (songname) {
-      isLongPressAction = true; // mark that a long press occurred
-      longPressTimer = null;
-      addBookmarkMenuOverlay.dataset.songname = songname; // pass songname to the addBookmarkMenuOverlay.addEventListener
-      addBookmarkMenuOverlay.style.display = "flex";  // show Add Bookmark Menu popup window
-      // execution continues with the addBookmarkMenuOverlay.addEventListener click events
-      
-    } else {
-      // should never get here
-      console.error("Could not find song title at index:", index, songname);
-    }
-  }, 700); // Hold duration required to activate popup
-});
-
-
-// Touch Move (Cancel if swiping) for desktop
-swiperWrapper.addEventListener('pointermove', (e) => {
-  if (longPressTimer) {
-    if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-    }
-    // turn to next page even with a slight vertical drift/swipe
-    if (Math.abs(e.clientY - startY) > 5) {
-      swiper.slideNext();
-    }
-  }
-});
-
-// Touch Move (Cancel if swiping) for tablet
-swiperWrapper.addEventListener('touchmove', (e) => {
-  if (longPressTimer) {
-    if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-    }
-    // turn to next page even with a slight vertical drift/swipe
-    if (Math.abs(e.clientY - startY) > 5) {
-      swiper.slideNext();
-    }
-  }
-});
-
-// Touch End (Cancel) / Pointer Up - Handles short tap zone transitions
-swiperWrapper.addEventListener('pointerup', (e) => {
-  if (longPressTimer) {
-    clearTimeout(longPressTimer);
-    longPressTimer = null;    
-    // Note: Short tap action is intentionally bypassed here because 
-    // Swiper's native 'click' callback handler catches it cleanly instead.
-  }
-});
-
-// Global catch-all safety window tracker to kill hanging timers if pointer leaves context
-window.addEventListener('pointercancel', () => {
-  if (longPressTimer) {
-    clearTimeout(longPressTimer);
-    longPressTimer = null;
-  }
-});
-
-// Prevent Default Context Menu
-swiperWrapper.addEventListener('contextmenu', (e) => {
-  e.preventDefault();
-  return false;
-});
-
-// Prevent longpress popup when vertical scroll in landscape mode
-const container = document.querySelector('.songsheet-container');
-container.addEventListener('scroll', () => {
-  if (longPressTimer) {
-    clearTimeout(longPressTimer);
-    longPressTimer = null;
-  }
-}, { passive: true });
-
-// Go back to no zoom (1x) when device orientation change
-window.addEventListener("orientationchange", () => {
-  // Small delay ensures the browser has finished the rotation animation
-  setTimeout(() => {
-    if (swiper.zoom) {
-      swiper.zoom.out();
-    }
-  }, 200);
-});
-    
 
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
