@@ -158,7 +158,7 @@ let swiper = new Swiper(".swiper", {
       } else {  // swipe to next page
         swiper.slideNext(); 
       }
-    }
+    },
 
     // re-fetch the broken img links when back online
     slideChange: function() {
