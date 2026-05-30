@@ -155,9 +155,18 @@ let swiper = new Swiper(".swiper", {
       if (isLongPressAction) {
         isLongPressAction = false;
         return;
-      } else {  // swipe to next page
-        swiper.slideNext(); 
       }
+      
+      // page turn rate limiting check
+      const now = Date.now();
+      if (now - lastPageTurnTime < PAGE_TURN_DELAY) {
+        console.log("Tap blocked: Rate limit active.");
+        return; 
+      }
+      
+      lastPageTurnTime = now; // reset the page-turn start time
+      swiper.slideNext();     // turn to next page
+      
     },
 
     // re-fetch the broken img links when back online
