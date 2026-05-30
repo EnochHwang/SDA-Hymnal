@@ -143,8 +143,24 @@ let swiper = new Swiper(".swiper", {
     }
   },
 
-  on: {
-    // this on block is to re-fetch the broken img links when back online
+  on: { // on given following event blocks
+      
+    // --- SHORT PRESS PAGE TURN ---
+    click: function(e) {
+      // Swiper automatically filters out active horizontal swipes here.
+      // It catches quick taps, even if the finger drifted vertically.
+      if (swiper.zoom && swiper.zoom.scale > 1) return; // Skip if zoomed in
+
+      // If the finger lift followed a long press, clear the flag and do nothing
+      if (isLongPressAction) {
+        isLongPressAction = false;
+        return;
+      } else {  // swipe to next page
+        swiper.slideNext(); 
+      }
+    }
+
+    // re-fetch the broken img links when back online
     slideChange: function() {
       // We use a tiny timeout to ensure the DOM has updated the 'active' class
       setTimeout(() => {
@@ -161,23 +177,22 @@ let swiper = new Swiper(".swiper", {
           }
         }
       }, 50); // 50ms is unnoticeable but enough for Swiper to sync
-    },
-    
-    // --- SHORT PRESS PAGE TURN ---
-    click: function(e) {
-      // Swiper automatically filters out active horizontal swipes here.
-      // It catches quick taps, even if the finger drifted vertically.
-      if (swiper.zoom && swiper.zoom.scale > 1) return; // Skip if zoomed in
-
-      // If the finger lift followed a long press, clear the flag and do nothing
-      if (isLongPressAction) {
-        isLongPressAction = false;
-        return;
-      } else {  // swipe to next page
-        swiper.slideNext(); 
-      }
     }
-      
+    
+    // --- page turn rate limiting check ---
+    // slideChangeTransitionStart: function() {
+      // const now = Date.now();
+      // If the user managed to force a physical swipe faster than 1 second,
+      // snap them back immediately to the origin page index.
+      // if (now - lastPageTurnTime < PAGE_TURN_DELAY) {
+        // swiper.slideTo(swiper.previousIndex, 0); // snap back instantly with 0 animation speed
+        // console.log("Swipe blocked: Double flip prevented.");
+      // } else {
+        // Legitimate swipe, update the tracking gate timestamp
+        // lastPageTurnTime = now;
+      // }
+    // }
+    
   } // end on
     
 });
@@ -228,6 +243,8 @@ swiper.removeAllSlides();
 // Gestures not handled here will be handled in the swiper on:click function
 const swiperWrapper = document.querySelector('.swiper-wrapper');
 const addBookmarkMenuOverlay = document.getElementById('addBookmarkMenuOverlay');
+let lastPageTurnTime = 0;     // --- RATE LIMITING PAGE TURNS ---
+const PAGE_TURN_DELAY = 1000; // 1 second buffer gate
 let longPressTimer = null;
 let isLongPressAction = false; // Flag to track if the touch was a long press
 let startX = 0;
@@ -285,7 +302,12 @@ swiperWrapper.addEventListener('pointermove', (e) => {
     }
     // turn to next page even with a slight vertical drift/swipe
     if (Math.abs(e.clientY - startY) > 5) {
-      swiper.slideNext();
+      // page turn rate limiting check
+      const now = Date.now();
+      if (now - lastPageTurnTime >= PAGE_TURN_DELAY) {
+        lastPageTurnTime = now; // reset the page-turn start time
+        swiper.slideNext();     // turn to next page
+      }
     }
   }
 });
@@ -299,7 +321,12 @@ swiperWrapper.addEventListener('touchmove', (e) => {
     }
     // turn to next page even with a slight vertical drift/swipe
     if (Math.abs(e.clientY - startY) > 5) {
-      swiper.slideNext();
+      // page turn rate limiting check
+      const now = Date.now();
+      if (now - lastPageTurnTime >= PAGE_TURN_DELAY) {
+        lastPageTurnTime = now; // reset the page-turn start time
+        swiper.slideNext();     // turn to next page
+      }
     }
   }
 });
