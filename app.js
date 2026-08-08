@@ -2773,7 +2773,7 @@ async function registerServiceWorker() {
     } // end if ('serviceWorker' in navigator)
 }
 
-//registerServiceWorker();  // start the Service Worker
+registerServiceWorker();  // start the Service Worker
 
 // Check for service worker updates every so often
 setInterval(() => {
