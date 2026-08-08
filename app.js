@@ -577,42 +577,8 @@ function closeMoreMenu() {
 // or "A Child of the King 468" (for ALPHABETIC_INDEX)
 // pageIndex >= 0 when called from handleBookmarkSelect. This is for when there are two or more of the same songname in the bookmark list
 // pageIndex == -1 when called from attachListItemEventHandler or renderSearchList, and this value is not used in displaySong
-/*
-// original
 function displaySong(songname, pageIndex) {
-  // do the following only if not given the pageIndex from attachListItemEventHandler and renderSearchList
-  if (pageIndex == -1) {
-    // find the songname in the currentListPages
-    let targetFilename = formatName(songname); // convert to pages format
-    pageIndex = currentListPages.findIndex(name => name === targetFilename || name.startsWith(targetFilename));
-
-    if (pageIndex == -1) { // song is not in currentListPages
-      // see if it is in FIRSTLINE_INDEX
-      pageIndex = FIRSTLINE_INDEX.findIndex(name => name === targetFilename || name.startsWith(targetFilename));
-      targetFilename = FIRSTLINE_PAGES[pageIndex];
-      pageIndex = currentListPages.findIndex(name => name === targetFilename || name.startsWith(targetFilename));  
-    }
-    
-    if (pageIndex == -1) { // song is not in currentListPages and FIRSTLINE_INDEX
-    //// TODO may have a bug here for searching My Songs
-      // see if it is in My Songs by using the songname as is
-      targetFilename = songname;
-      pageIndex = currentListPages.findIndex(name => name === targetFilename || name.startsWith(targetFilename));
-      }
-  }
-  
-  if (pageIndex !== -1) { // found the song
-    syncSwiper(); // update swiper state
-    
-    // Slide to the page
-    swiper.slideTo(pageIndex, 0);
-  } else {
-    console.warn("Could not find page for: ", songname);
-  }
-}
-*/
-
-function displaySong(songname, pageIndex) {
+  console.log("songname: ", songname);
   // do the following only if not given the pageIndex from attachListItemEventHandler and renderSearchList
   if (pageIndex == -1) {
     let targetFilename = formatName(songname);
@@ -631,8 +597,10 @@ function displaySong(songname, pageIndex) {
 
     // 3. Fallback to FIRSTLINE_INDEX (Strict match only!)
     if (pageIndex == -1) { // song is not in currentListPages
-      // Look for an EXACT match for the songname in the first lines
-      const firstLineIdx = FIRSTLINE_INDEX.findIndex(name => name === songname);
+      // Convert songname from "Title Number" to "Number Title" to match FIRSTLINE_INDEX format
+      const formattedSongname = formatName(songname);
+      // Look for an EXACT match for the songname in the FIRSTLINE_INDEX
+      const firstLineIdx = FIRSTLINE_INDEX.findIndex(name => name === songname || name === formattedSongname);
       
       if (firstLineIdx !== -1) {
         targetFilename = FIRSTLINE_PAGES[firstLineIdx];
@@ -2805,7 +2773,7 @@ async function registerServiceWorker() {
     } // end if ('serviceWorker' in navigator)
 }
 
-registerServiceWorker();  // start the Service Worker
+//registerServiceWorker();  // start the Service Worker
 
 // Check for service worker updates every so often
 setInterval(() => {
