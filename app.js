@@ -310,14 +310,15 @@ swiperWrapper.addEventListener('pointermove', (e) => {
       longPressTimer = null;
     }
     // turn to next page even with a slight vertical drift/swipe
-    if (Math.abs(e.clientY - startY) > 5) {
-      // page turn rate limiting check
-      const now = Date.now();
-      if (now - lastPageTurnTime >= PAGE_TURN_DELAY) {
-        lastPageTurnTime = now; // reset the page-turn start time
-        swiper.slideNext();     // turn to next page
-      }
-    }
+// don't want to turn to next page when swipe up
+//    if (Math.abs(e.clientY - startY) > 5) {
+//      // page turn rate limiting check
+//      const now = Date.now();
+//      if (now - lastPageTurnTime >= PAGE_TURN_DELAY) {
+//        lastPageTurnTime = now; // reset the page-turn start time
+//        swiper.slideNext();     // turn to next page
+//      }
+//    }
   }
 });
 
@@ -329,14 +330,15 @@ swiperWrapper.addEventListener('touchmove', (e) => {
       longPressTimer = null;
     }
     // turn to next page even with a slight vertical drift/swipe
-    if (Math.abs(e.clientY - startY) > 5) {
-      // page turn rate limiting check
-      const now = Date.now();
-      if (now - lastPageTurnTime >= PAGE_TURN_DELAY) {
-        lastPageTurnTime = now; // reset the page-turn start time
-        swiper.slideNext();     // turn to next page
-      }
-    }
+// don't want to turn to next page when swipe up
+//    if (Math.abs(e.clientY - startY) > 5) {
+//      // page turn rate limiting check
+//      const now = Date.now();
+//      if (now - lastPageTurnTime >= PAGE_TURN_DELAY) {
+//        lastPageTurnTime = now; // reset the page-turn start time
+//        swiper.slideNext();     // turn to next page
+//      }
+//    }
   }
 });
 
