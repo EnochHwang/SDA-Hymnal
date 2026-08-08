@@ -1893,7 +1893,7 @@ function renderSearchList(songs) {
   adjustSearchListHeight(); // Adjust list height whenever results change
 
   if (songs.length === 0) {
-    searchList.innerHTML = '<div style="padding:20px; color:#888; text-align:center;">未找到匹配的歌曲</div>'; // No matching songs found
+    searchList.innerHTML = '<div style="padding:20px; color:#888; text-align:center;">No matching songs found</div>'; // No matching songs found
     return;
   }
   // only one matching song so display it
