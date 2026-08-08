@@ -578,7 +578,6 @@ function closeMoreMenu() {
 // pageIndex >= 0 when called from handleBookmarkSelect. This is for when there are two or more of the same songname in the bookmark list
 // pageIndex == -1 when called from attachListItemEventHandler or renderSearchList, and this value is not used in displaySong
 function displaySong(songname, pageIndex) {
-  console.log("songname: ", songname);
   // do the following only if not given the pageIndex from attachListItemEventHandler and renderSearchList
   if (pageIndex == -1) {
     let targetFilename = formatName(songname);
